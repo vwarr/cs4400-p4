@@ -9,44 +9,30 @@
 </head>
 <body>
     <h1>flight_in_the_air()</h1>
-    <form class="form_wrapper" action="/#somethinghere?" method="method_name">
-        <div class='form_content'>
-            <div class="form_container">
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="airportID">Airport ID:</label>
-                        <input id="airportID" type="text" maxlength="3" name="airportID" placeholder="JFK">
-                    </div>
-                    <div class="form_group">
-                        <label for="state">State:</label>
-                        <input id="state" type="text" name="state" placeholder="New York">
-                    </div>
-                </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="airport_name">Airport Name:</label>
-                        <input id="airport_name" type="text" name="airport_name" placeholder="John F Kennedy International">
-                    </div>
-                    <div class="form_group">
-                        <label for="country">Country:</label>
-                        <input id="country" type="text" name="country" maxlength="3" placeholder="USA">
-                    </div>
-                </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="city">City:</label>
-                        <input id="city" type="text" name="city" placeholder="New York">
-                    </div>
-                    <div class="form_group">
-                        <label for="locationID">Location ID:</label>
-                        <input id="locationID" type="text" name="locationID" placeholder="port_33">
-                    </div>
-                </div>
-            </div>
-            <div class="form_buttons">
-                <button type="cancel">Cancel</button>
-                <button type="submit">Submit</button>
-            </div>
-        </div>
-    </form>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>departing_from</th>
+                <th>arriving_at</th>
+                <th>num_flights</th>
+                <th>flight_list</th>
+                <th>earliest_arrival</th>
+                <th>latest_arrival</th>
+                <th>airplane_list</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.departing_from }}</td>
+                <td>{{ row.arriving_at }}</td>
+                <td>{{ row.num_flights }}</td>
+                <td>{{ row.flight_list }}</td>
+                <td>{{ row.earliest_arrival }}</td>
+                <td>{{ row.latest_arrival }}</td>
+                <td>{{ row.airplane_list }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
