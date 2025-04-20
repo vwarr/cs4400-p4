@@ -14,32 +14,41 @@
             <div class="form_container">
                 <div class='form_column'>
                     <div class="form_group">
-                        <label for="airportID">Airport ID:</label>
-                        <input id="airportID" type="text" maxlength="3" name="airportID" value="JFK">
-                    </div>
-                    <div class="form_group">
-                        <label for="state">State:</label>
-                        <input id="state" type="text" name="state" value="New York">
-                    </div>
-                </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="airport_name">Airport Name:</label>
-                        <input id="airport_name" type="text" name="airport_name" value="John F Kennedy International">
-                    </div>
-                    <div class="form_group">
-                        <label for="country">Country:</label>
-                        <input id="country" type="text" name="country" maxlength="3" value="USA">
-                    </div>
-                </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="city">City:</label>
-                        <input id="city" type="text" name="city" value="New York">
+                        <label for="personID">Person ID:</label>
+                        <input id="personID" type="text" name="personID" placeholder="p61">
                     </div>
                     <div class="form_group">
                         <label for="locationID">Location ID:</label>
-                        <input id="locationID" type="text" name="locationID" value="port_33">
+                        <input id="locationID" type="text" name="locationID" placeholder="port_1">
+                    </div>
+                    <div class="form_group">
+                        <label for="miles">Miles:</label>
+                        <input id="miles" type="number" name="miles" placeholder="NULL">
+                    </div>
+                </div>
+                <div class='form_column'>
+                    <div class="form_group">
+                        <label for="fname">First Name:</label>
+                        <input id="fname" type="text" name="fname" placeholder="Sabrina">
+                    </div>
+                    <div class="form_group">
+                        <label for="taxID">Tax ID:</label>
+                        <input id="tax_id" type="text" name="tax_id" maxlength="11"
+                         pattern="\d{3}-\d{2}-\d{4}" placeholder="123-45-6789" required />
+                    </div>
+                    <div class="form_group">
+                        <label for="funds">Funds:</label>
+                        <input id="funds" type="number" name="funds" placeholder="NULL"/>
+                    </div>
+                </div>
+                <div class='form_column'>
+                    <div class="form_group">
+                        <label for="lname">Last Name:</label>
+                        <input id="lname" type="text" name="lname" placeholder="Duncan">
+                    </div>
+                    <div class="form_group">
+                        <label for="experience">Location ID:</label>
+                        <input id="experience" type="number" name="experience" placeholder="27">
                     </div>
                 </div>
             </div>
