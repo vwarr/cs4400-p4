@@ -9,7 +9,7 @@
 </head>
 <body>
     <h1>add_airport()</h1>
-    <form class="form_wrapper" action="/#somethinghere?" method="method_name">
+    <form class="form_wrapper" action="/add_airport" method="POST">
         <div class='form_content'>
             <div class="form_container">
                 <div class='form_column'>
@@ -44,8 +44,8 @@
                 </div>
             </div>
             <div class="form_buttons">
-                <button type="cancel">Cancel</button>
-                <button type="submit">Add</button>
+                <button type="button" onclick="window.location.href='/'">Cancel</button>
+                <button type="submit">Submit</button>
             </div>
         </div>
     </form>

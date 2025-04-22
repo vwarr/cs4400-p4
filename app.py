@@ -1,6 +1,13 @@
+from flask import Flask, render_template, request, redirect, url_for
+import backend as be
+from flask import Flask, g, jsonify
+"""
+from dotenv import load_dotenv
 import os
 from flask import Flask, g, request, jsonify
 from mysql.connector import pooling
+
+load_dotenv()
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,8 +34,29 @@ def close_db(exc):
     if hasattr(g, 'db_conn'):
         g.db_conn.close()
 
-@app.route('/add_airplane', methods=['POST'])
+@app.route('/test-leg-time/<int:distance>/<int:speed>')
+def test_leg_time(distance, speed):
+    g.db_cursor.execute(
+        "SELECT leg_time(%s, %s) AS duration",
+        (distance, speed)
+    )
+    row = g.db_cursor.fetchone()
+    return jsonify({
+        'distance': distance,
+        'speed': speed,
+        'duration': str(row['duration'])
+    })
+"""
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return render_template('index.html')
+
+@app.route('/add_airplane', methods=['POST', 'GET'])
 def api_add_airplane():
+    print("add_airplane")
     data = request.get_json()
     args = [
         data['airlineID'], data['tail_num'], data['seat_capacity'], data['speed'],
@@ -37,10 +65,11 @@ def api_add_airplane():
     ]
     g.db_cursor.callproc('add_airplane', args)
     g.db_conn.commit()
-    return jsonify({'status': 'airplane_added'}), 201
+    return render_template('add_airplane.html')
 
-@app.route('/add_airport', methods=['POST'])
+@app.route('/add_airport', methods=['POST', 'GET'])
 def api_add_airport():
+    print("add_airport")
     data = request.get_json()
     args = [
         data['airportID'], data['airport_name'], data['city'],
@@ -48,10 +77,11 @@ def api_add_airport():
     ]
     g.db_cursor.callproc('add_airport', args)
     g.db_conn.commit()
-    return jsonify({'status': 'airport_added'}), 201
+    return render_template('add_airport.html')
 
-@app.route('/add_person', methods=['POST'])
+@app.route('/add_person', methods=['POST', 'GET'])
 def api_add_person():
+    print("add_perosn")
     data = request.get_json()
     args = [
         data['personID'], data['first_name'], data.get('last_name'),
@@ -60,18 +90,20 @@ def api_add_person():
     ]
     g.db_cursor.callproc('add_person', args)
     g.db_conn.commit()
-    return jsonify({'status': 'person_added'}), 201
+    return render_template('add_person.html')
 
-@app.route('/grant_or_revoke_pilot_license', methods=['POST'])
+@app.route('/grant_or_revoke_pilot_license', methods=['POST', 'GET'])
 def api_toggle_pilot_license():
+    print("grant/revoke license")
     data = request.get_json()
     args = [data['personID'], data['license']]
     g.db_cursor.callproc('grant_or_revoke_pilot_license', args)
     g.db_conn.commit()
-    return jsonify({'status': 'pilot_license_toggled'}), 200
+    return render_template('grant_or_revoke.html')
 
-@app.route('/offer_flight', methods=['POST'])
+@app.route('/offer_flight', methods=['POST', 'GET'])
 def api_offer_flight():
+    print("offer_flight")
     data = request.get_json()
     args = [
         data['flightID'], data['routeID'], data['support_airline'],
@@ -79,60 +111,97 @@ def api_offer_flight():
     ]
     g.db_cursor.callproc('offer_flight', args)
     g.db_conn.commit()
-    return jsonify({'status': 'flight_offered'}), 201
+    return render_template('offer_flight.html')
 
-@app.route('/flight_landing', methods=['POST'])
+@app.route('/flight_landing', methods=['POST', 'GET'])
 def api_flight_landing():
+    print("flight_landing")
     g.db_cursor.callproc('flight_landing', [request.get_json()['flightID']])
     g.db_conn.commit()
-    return jsonify({'status': 'flight_landed'}), 200
+    return render_template('flight_landing.html')
 
-@app.route('/flight_takeoff', methods=['POST'])
+@app.route('/flight_takeoff', methods=['POST', 'GET'])
 def api_flight_takeoff():
+    print("flight_takeoff")
     g.db_cursor.callproc('flight_takeoff', [request.get_json()['flightID']])
     g.db_conn.commit()
-    return jsonify({'status': 'flight_takeoff_executed'}), 200
+    return render_template('flight_takeoff.html')
 
-@app.route('/passengers_board', methods=['POST'])
+@app.route('/passengers_board', methods=['POST', 'GET'])
 def api_passengers_board():
+    print("passengers_board")
     g.db_cursor.callproc('passengers_board', [request.get_json()['flightID']])
     g.db_conn.commit()
-    return jsonify({'status': 'passengers_boarded'}), 200
+    return render_template('passengers.board.html')
 
-@app.route('/passengers_disembark', methods=['POST'])
+@app.route('/passengers_disembark', methods=['POST', 'GET'])
 def api_passengers_disembark():
+    print("disembark")
     g.db_cursor.callproc('passengers_disembark', [request.get_json()['flightID']])
     g.db_conn.commit()
-    return jsonify({'status': 'passengers_disembarked'}), 200
+    return render_template('passengers.disembark.html')
 
-@app.route('/assign_pilot', methods=['POST'])
+@app.route('/assign_pilot', methods=['POST', 'GET'])
 def api_assign_pilot():
+    print("assign_pilot")
     data = request.get_json()
     g.db_cursor.callproc('assign_pilot', [data['flightID'], data['personID']])
     g.db_conn.commit()
-    return jsonify({'status': 'pilot_assigned'}), 200
+    return render_template('assign_pilot.html')
 
-@app.route('/recycle_crew', methods=['POST'])
+@app.route('/recycle_crew', methods=['POST', 'GET'])
 def api_recycle_crew():
+    print("recycle_crew")
     g.db_cursor.callproc('recycle_crew', [request.get_json()['flightID']])
     g.db_conn.commit()
-    return jsonify({'status': 'crew_recycled'}), 200
+    return render_template('recycle_crew.html')
 
-@app.route('/retire_flight', methods=['POST'])
+@app.route('/retire_flight', methods=['POST', 'GET'])
 def api_retire_flight():
+    print("ret_flight")
     g.db_cursor.callproc('retire_flight', [request.get_json()['flightID']])
     g.db_conn.commit()
-    return jsonify({'status': 'flight_retired'}), 200
+    return render_template('retire_flight.html')
 
-@app.route('/simulation_cycle', methods=['POST'])
+@app.route('/simulation_cycle', methods=['POST', 'GET'])
 def api_simulation_cycle():
+    print("sim cycle")
     g.db_cursor.callproc('simulation_cycle', [])
     g.db_conn.commit()
-    return jsonify({'status': 'simulation_cycle_executed'}), 200
+    return render_template('simulation_cycle.html')
 
-@app.route('/')
-def hello_world():
-    return '<p>Hello, World!</p>'
+@app.route('/alternate_airports', methods=['POST', 'GET'])
+def alternate_airports():
+    print("alt airports")
+    return render_template('alternate_airports.html')
+
+@app.route('/flights_in_the_air', methods=['POST', 'GET'])
+def flights_in_the_air():
+    print("flights in the air")
+    return render_template('flights_in_the_air.html')
+
+@app.route('/flights_on_the_ground', methods=['POST', 'GET'])
+def flights_on_the_ground():
+    print("flights in the ground")
+    return render_template('flights_on_the_ground.html')
+
+@app.route('/people_in_the_air', methods=['POST', 'GET'])
+def people_in_the_air():
+    print("ppl in the air")
+    return render_template('people_in_the_air.html')
+
+@app.route('/people_on_the_ground', methods=['POST', 'GET'])
+def people_on_the_ground():
+    print("ppl in the ground")
+    return render_template('people_on_the_ground.html')
+
+@app.route('/route_summary', methods=['POST', 'GET'])
+def route_summary():
+    print("route_summary")
+    return render_template('route_summary.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
