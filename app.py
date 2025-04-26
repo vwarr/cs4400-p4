@@ -4,10 +4,7 @@ from flask import Flask, g, jsonify
 from dotenv import load_dotenv
 import os
 from flask import Flask, g, request, jsonify
-from mysql.connector import pooling
-
-load_dotenv()
-from dotenv import load_dotenv
+from mysql.connector import pooling, DatabaseError
 
 load_dotenv()
 app = Flask(__name__)
@@ -44,13 +41,12 @@ def api_add_airplane():
     data = request.form
     args = [
         data['airlineID'], data['tail_num'], data['seat_capacity'], data['speed'],
-        data['locationID'], data['plane_type'], data['maintenanced'],
+        data.get('locationID'), data.get('plane_type'), data.get('maintenanced'),
         data.get('model'), data.get('neo')
     ]
     g.db_cursor.callproc('add_airplane', args)
     g.db_conn.commit()
     return render_template('add_airplane.html', success=True)
-    
 
 @app.route('/add_airport', methods=['POST', 'GET'])
 def api_add_airport():
@@ -59,8 +55,8 @@ def api_add_airport():
     print("add_airport")
     data = request.form
     args = [
-        data['airportID'], data['airport_name'], data['city'],
-        data['state'], data['country'], data['locationID']
+        data['airportID'], data.get('airport_name'), data['city'],
+        data['state'], data['country'], data.get('locationID')
     ]
     g.db_cursor.callproc('add_airport', args)
     g.db_conn.commit()
