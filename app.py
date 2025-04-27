@@ -38,148 +38,200 @@ def index():
 def api_add_airplane():
     if request.method == 'GET':
         return render_template('add_airplane.html')
-    data = request.form
-    args = [
-        data['airlineID'], data['tail_num'], data['seat_capacity'], data['speed'],
-        data.get('locationID'), data.get('plane_type'), data.get('maintenanced'),
-        data.get('model'), data.get('neo')
-    ]
-    g.db_cursor.callproc('add_airplane', args)
-    g.db_conn.commit()
-    return render_template('add_airplane.html', success=True)
+    try:
+        data = request.form
+        args = [
+            data['airlineID'], data['tail_num'], data['seat_capacity'], data['speed'],
+            data.get('locationID'), data.get('plane_type'), data.get('maintenanced'),
+            data.get('model'), data.get('neo')
+        ]
+        g.db_cursor.callproc('add_airplane', args)
+        g.db_conn.commit()
+        return render_template('add_airplane.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('add_airplane.html', success=False)
 
 @app.route('/add_airport', methods=['POST', 'GET'])
 def api_add_airport():
     if request.method == 'GET':
         return render_template('add_airport.html')
-    print("add_airport")
-    data = request.form
-    args = [
-        data['airportID'], data.get('airport_name'), data['city'],
-        data['state'], data['country'], data.get('locationID')
-    ]
-    g.db_cursor.callproc('add_airport', args)
-    g.db_conn.commit()
-    return render_template('add_airport.html', success=True)
+    try:
+        print("add_airport")
+        data = request.form
+        args = [
+            data['airportID'], data.get('airport_name'), data['city'],
+            data['state'], data['country'], data.get('locationID')
+        ]
+        g.db_cursor.callproc('add_airport', args)
+        g.db_conn.commit()
+        return render_template('add_airport.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('add_airport.html', success=False)
 
 @app.route('/add_person', methods=['POST', 'GET'])
 def api_add_person():
     if request.method == 'GET':
         return render_template('add_person.html')
-    print("add_person")
-    data = request.form
-    args = [
-        data['personID'], data['first_name'], data.get('last_name'),
-        data['locationID'], data.get('taxID'), data.get('experience'),
-        data.get('miles'), data.get('funds')
-    ]
-    g.db_cursor.callproc('add_person', args)
-    g.db_conn.commit()
-    return render_template('add_person.html')
+    try:
+        print("add_person")
+        data = request.form
+        args = [
+            data['personID'], data['first_name'], data.get('last_name'),
+            data['locationID'], data.get('taxID'), data.get('experience'),
+            data.get('miles'), data.get('funds')
+        ]
+        g.db_cursor.callproc('add_person', args)
+        g.db_conn.commit()
+        return render_template('add_person.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('add_person.html', success=False)
 
 @app.route('/grant_or_revoke_pilot_license', methods=['POST', 'GET'])
 def api_toggle_pilot_license():
     if request.method == 'GET':
         return render_template('grant_or_revoke.html')
-    print("grant/revoke license")
-    data = request.form
-    args = [data['personID'], data['license']]
-    g.db_cursor.callproc('grant_or_revoke_pilot_license', args)
-    g.db_conn.commit()
-    return render_template('grant_or_revoke.html')
+    try:
+        print("grant/revoke license")
+        data = request.form
+        args = [data['personID'], data['license']]
+        g.db_cursor.callproc('grant_or_revoke_pilot_license', args)
+        g.db_conn.commit()
+        return render_template('grant_or_revoke.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('grant_or_revoke.html', success=False)
 
 @app.route('/offer_flight', methods=['POST', 'GET'])
 def api_offer_flight():
     if request.method == 'GET':
         return render_template('offer_flight.html')
-    print("offer_flight")
-    data = request.form
-    args = [
-        data['flightID'], data['routeID'], data['support_airline'],
-        data['support_tail'], data['progress'], data['next_time'], data['cost']
-    ]
-    g.db_cursor.callproc('offer_flight', args)
-    g.db_conn.commit()
-    return render_template('offer_flight.html')
+    try:
+        print("offer_flight")
+        data = request.form
+        args = [
+            data['flightID'], data['routeID'], data['support_airline'],
+            data['support_tail'], data['progress'], data['next_time'], data['cost']
+        ]
+        g.db_cursor.callproc('offer_flight', args)
+        g.db_conn.commit()
+        return render_template('offer_flight.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('offer_flight.html', success=False)
 
 @app.route('/flight_landing', methods=['POST', 'GET'])
 def api_flight_landing():
     if request.method == 'GET':
         return render_template('flight_landing.html')
-    print("flight_landing")
-    data = request.form
-    g.db_cursor.callproc('flight_landing', [data['flightID']])
-    g.db_conn.commit()
-    return render_template('flight_landing.html')
+    try:
+        print("flight_landing")
+        data = request.form
+        g.db_cursor.callproc('flight_landing', [data['flightID']])
+        g.db_conn.commit()
+        return render_template('flight_landing.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('flight_landing.html', success=False)
 
 @app.route('/flight_takeoff', methods=['POST', 'GET'])
 def api_flight_takeoff():
     if request.method == 'GET':
         return render_template('flight_takeoff.html')
-    print("flight_takeoff")
-    data = request.form
-    g.db_cursor.callproc('flight_takeoff', [data['flightID']])
-    g.db_conn.commit()
-    return render_template('flight_takeoff.html')
+    try:
+        print("flight_takeoff")
+        data = request.form
+        g.db_cursor.callproc('flight_takeoff', [data['flightID']])
+        g.db_conn.commit()
+        return render_template('flight_takeoff.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('flight_takeoff.html', success=False)
 
 @app.route('/passengers_board', methods=['POST', 'GET'])
 def api_passengers_board():
     if request.method == 'GET':
         return render_template('passengers.board.html')
-    print("passengers_board")
-    data = request.form
-    g.db_cursor.callproc('passengers_board', [data['flightID']])
-    g.db_conn.commit()
-    return render_template('passengers.board.html')
+    try:
+        print("passengers_board")
+        data = request.form
+        g.db_cursor.callproc('passengers_board', [data['flightID']])
+        g.db_conn.commit()
+        return render_template('passengers.board.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('passengers.board.html', success=False)
 
 @app.route('/passengers_disembark', methods=['POST', 'GET'])
 def api_passengers_disembark():
     if request.method == 'GET':
         return render_template('passengers.disembark.html')
-    print("disembark")
-    data = request.form
-    g.db_cursor.callproc('passengers_disembark', [data['flightID']])
-    g.db_conn.commit()
-    return render_template('passengers.disembark.html')
+    try:
+        print("disembark")
+        data = request.form
+        g.db_cursor.callproc('passengers_disembark', [data['flightID']])
+        g.db_conn.commit()
+        return render_template('passengers.disembark.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('passengers.disembark.html', success=False)
 
 @app.route('/assign_pilot', methods=['POST', 'GET'])
 def api_assign_pilot():
     if request.method == 'GET':
         return render_template('assign_pilot.html')
-    print("assign_pilot")
-    data = request.form
-    g.db_cursor.callproc('assign_pilot', [data['flightID'], data['personID']])
-    g.db_conn.commit()
-    return render_template('assign_pilot.html')
+    try:
+        print("assign_pilot")
+        data = request.form
+        g.db_cursor.callproc('assign_pilot', [data['flightID'], data['personID']])
+        g.db_conn.commit()
+        return render_template('assign_pilot.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('assign_pilot.html', success=False)
 
 @app.route('/recycle_crew', methods=['POST', 'GET'])
 def api_recycle_crew():
     if request.method == 'GET':
         return render_template('recycle_crew.html')
-    print("recycle_crew")
-    data = request.form
-    g.db_cursor.callproc('recycle_crew', [data['flightID']])
-    g.db_conn.commit()
-    return render_template('recycle_crew.html')
+    try:
+        print("recycle_crew")
+        data = request.form
+        g.db_cursor.callproc('recycle_crew', [data['flightID']])
+        g.db_conn.commit()
+        return render_template('recycle_crew.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('recycle_crew.html', success=False)
 
 @app.route('/retire_flight', methods=['POST', 'GET'])
 def api_retire_flight():
     if request.method == 'GET':
         return render_template('retire_flight.html')
-    print("ret_flight")
-    data = request.form
-    g.db_cursor.callproc('retire_flight', [data['flightID']])
-    g.db_conn.commit()
-    return render_template('retire_flight.html')
+    try:
+        print("ret_flight")
+        data = request.form
+        g.db_cursor.callproc('retire_flight', [data['flightID']])
+        g.db_conn.commit()
+        return render_template('retire_flight.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('retire_flight.html', success=False)
 
 @app.route('/simulation_cycle', methods=['POST', 'GET'])
 def api_simulation_cycle():
     if request.method == 'GET':
         return render_template('simulation_cycle.html')
-    print("sim cycle")
-    g.db_cursor.callproc('simulation_cycle', [])
-    g.db_conn.commit()
-    return render_template('simulation_cycle.html')
+    try:
+        print("sim cycle")
+        g.db_cursor.callproc('simulation_cycle', [])
+        g.db_conn.commit()
+        return render_template('simulation_cycle.html', success=True)
+    except DatabaseError as e:
+        print(e)
+        return render_template('simulation_cycle.html', success=False)
 
 @app.route('/alternate_airports', methods=['POST', 'GET'])
 def alternate_airports():
