@@ -4,7 +4,7 @@ from flask import Flask, g, jsonify
 from dotenv import load_dotenv
 import os
 from flask import Flask, g, request, jsonify
-from mysql.connector import pooling, DatabaseError
+from mysql.connector import pooling, errorcode, DatabaseError, IntegrityError
 
 load_dotenv()
 app = Flask(__name__)
@@ -30,6 +30,14 @@ def close_db(exc):
     if hasattr(g, 'db_conn'):
         g.db_conn.close()
 
+def handle_db_error(e):
+    if isinstance(e, IntegrityError):
+        if e.errno == errorcode.ER_DUP_ENTRY:
+            return "Duplicate entry."
+        if e.errno in (errorcode.ER_NO_REFERENCED_ROW_2, errorcode.ER_NO_REFERENCED_ROW):
+            return "Invalid reference to another record."
+    return "Unexpected database behavior. Please check your inputs and try again."
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -38,19 +46,40 @@ def index():
 def api_add_airplane():
     if request.method == 'GET':
         return render_template('add_airplane.html')
+
+    data = request.form
+    missing = [f for f in ('airlineID', 'tail_num', 'seat_capacity', 'speed') if not data.get(f)]
+    if missing:
+        return render_template('add_airplane.html', success=False, error=f"Missing fields: {', '.join(missing)}")
+
     try:
-        data = request.form
-        args = [
-            data['airlineID'], data['tail_num'], data['seat_capacity'], data['speed'],
-            data.get('locationID'), data.get('plane_type'), data.get('maintenanced'),
-            data.get('model'), data.get('neo')
-        ]
+        seat_capacity = int(data['seat_capacity'])
+        if seat_capacity <= 0:
+            raise ValueError('Seat capacity must be greater than 0')
+        speed = int(data['speed'])
+        if speed <= 0:
+            raise ValueError('Speed must be greater than 0')
+    except ValueError as ve:
+        return render_template('add_airplane.html', success=False, error=str(ve))
+
+    args = [
+        data['airlineID'],
+        data['tail_num'],
+        seat_capacity,
+        speed,
+        data.get('locationID') or None,
+        data.get('plane_type') or None,
+        True if data.get('maintenanced') else None,
+        data.get('model') or None,
+        True if data.get('neo') else None
+    ]
+
+    try:
         g.db_cursor.callproc('add_airplane', args)
         g.db_conn.commit()
         return render_template('add_airplane.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('add_airplane.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('add_airplane.html', success=False, error=handle_db_error(e))
 
 @app.route('/add_airport', methods=['POST', 'GET'])
 def api_add_airport():
