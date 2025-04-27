@@ -56,17 +56,17 @@ sp_main: begin
 	declare tracker int;
     
 	IF NOT EXISTS (SELECT 1 FROM airline where airlineID = ip_airlineID) THEN
-		-- signal sqlstate '45000' set message_text = 'Associated airline does not exist';
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Add_airplane: Airline does not exist.';
 		LEAVE sp_main;
 	END IF;
     IF (ip_airlineID is null or ip_tail_num is null) THEN
-		-- signal sqlstate '45000' set message_text = 'Neither airline ID nor tail num can be null';
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Add_airplane: AirlineID or Tailnum is null.';
 		LEAVE sp_main;
 	END IF;
     
 	-- Ensure that the plane type is valid: Boeing, Airbus, or neither
-    if ip_plane_type not in ('Boeing', 'Airbus') or ip_plane_type is Null then
-		-- signal sqlstate '45000' set message_text = 'Plane type must be Boeing, Airbus, or neither';
+    if ip_plane_type not in ('Boeing', 'Airbus') and ip_plane_type is not Null then
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Add_airplane: Plane type is not Boeing or Airbus and is NOT null.';
 		leave sp_main;
 	end if;
     
@@ -75,18 +75,17 @@ sp_main: begin
     select count(*) into tracker from Airplane
 	where airlineID = ip_airlineID and tail_num = ip_tail_num;
 	if tracker > 0 then
-		-- signal sqlstate '45000' set message_text = 'Airplane must be unique';
 		leave sp_main;
 	end if;
     
     if ip_seat_capacity <= 0 or ip_speed <= 0 then
-		-- signal sqlstate '45000' set message_text = 'Seat capacity and speed must be non-negative';
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Add_airplane: Seat capacity or speed inputs are 0 or less.';
 		leave sp_main;
 	end if;
     
     select count(*) into tracker from Location where locationID = ip_locationID;
 	if tracker > 0 then
-		-- signal sqlstate '45000' set message_text = 'Location ID must be unique';
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Add_airplane: Location ID not unique';
 		leave sp_main;
 	end if;
     
@@ -118,20 +117,21 @@ sp_main: begin
 	-- Ensure that the airport and location values are new and unique
     -- Add airport and location into respective tables
 
+
     if ip_airportID is NULL or ip_airportID = '' then
-		-- signal sqlstate '45000' set message_text = 'Airport ID cannot be null nor empty';
+		signal sqlstate '45000' set message_text = 'Add_airport: Airport ID cannot be null nor empty';
         leave sp_main;
     elseif ip_locationID is NULL or ip_locationID = '' then
-		-- signal sqlstate '45000' set message_text = 'Location ID cannot be null nor empty';
+		signal sqlstate '45000' set message_text = 'Add_airport: Location ID cannot be null nor empty';
         leave sp_main;
     elseif ip_city is NULL or ip_city = '' then
-		-- signal sqlstate '45000' set message_text = 'City cannot be null nor empty';
+		signal sqlstate '45000' set message_text = 'Add_airport: City cannot be null nor empty';
         leave sp_main;
     elseif ip_state is NULL or ip_state = '' then
-		-- signal sqlstate '45000' set message_text = 'State cannot be null nor empty';
+		signal sqlstate '45000' set message_text = 'Add_airport: State cannot be null nor empty';
         leave sp_main;
     elseif ip_country is NULL or ip_country = '' then
-		-- signal sqlstate '45000' set message_text = 'Country cannot be null nor empty';
+		signal sqlstate '45000' set message_text = 'Add_airport: Country cannot be null nor empty';
         leave sp_main;
     end if;
     
@@ -139,7 +139,7 @@ sp_main: begin
 		insert into location(locationID)VALUES(ip_locationID);
 		insert into airport(airportID, airport_name, city, state, country, locationID)VALUES(ip_airportID, ip_airport_name, ip_city, ip_state, ip_country, ip_locationID);
 	else
-		-- signal sqlstate '45000' set message_text = 'Airpot and location must be new and unique';
+		signal sqlstate '45000' set message_text = 'Add_airport: Airport and location must be new and unique';
 		leave sp_main;
 	END IF;
 
@@ -173,19 +173,16 @@ sp_main: begin
     
 	-- Ensure that the location is valid
 	if not exists (select 1 from Location where locationID = ip_locationID) then
-        -- signal sqlstate '45000' set message_text = 'Location is invalid';
+        signal sqlstate '45000' set message_text = 'Add_person: Location is invalid';
         leave sp_main;
     -- Ensure that the persion ID is unique
 	elseif exists (select 1 from Person where personID = ip_personID) then
-		-- signal sqlstate '45000' set message_text = 'Person ID already exists';
+        signal sqlstate '45000' set message_text = 'Add_person: PersonID is invalid';
+
         leave sp_main;
     -- Ensure that the person is a pilot or passenger
     elseif ip_taxID is null and ip_funds is null then
-		-- signal sqlstate '45000' set message_text = 'Person is neither a pilot nor a passenger. This is not allowed';
-        leave sp_main;
-    -- Extra check: ensure person's first name is not null or empty;
-    elseif ip_first_name is null or length(ip_first_name) = 0 then
-		-- signal sqlstate '45000' set message_text = 'Person's first name cannot be null or empty';
+		signal sqlstate '45000' set message_text = 'Add_person: Person is neither a pilot nor a passenger. This is not allowed. Enter valid taxID or funds amount.';
         leave sp_main;
     -- Add them to the person table as well as the table of their respective role
 	else
@@ -196,9 +193,8 @@ sp_main: begin
             insert into pilot(personID, taxID, experience)
             values (ip_personID, ip_taxID, ip_experience);
         end if;
-
         if ip_funds is not null then
-            insert into assenger(personID, miles, funds)
+            insert into passenger(personID, miles, funds)
             values (ip_personID, ip_miles, ip_funds);
         end if;
 	end if;
@@ -227,9 +223,6 @@ sp_main: begin
         ELSE
 			INSERT INTO pilot_licenses VALUES (ip_personID, ip_license);
 		END IF;
-	ELSE
-		-- signal sqlstate '45000' set message_text = 'Pilot does not exist';
-        leave sp_main;
 	END IF;
 
 end //
@@ -257,27 +250,26 @@ sp_main: begin
     -- Create the flight with the airplane starting in on the ground
 
 	IF (ip_routeID is null or ip_flightID is null) THEN
-		-- signal sqlstate '45000' set message_text = 'RouteID and FlightID cannot be null';
+		signal sqlstate '45000' set message_text = 'Offer_flight: ip_route ID or ip_flight ID is null';
 		LEAVE sp_main;
     END IF;
 	IF EXISTS (SELECT 1 FROM flight where flightID = ip_flightID) THEN
-		-- signal sqlstate '45000' set message_text = 'FlightID already exists';
+		signal sqlstate '45000' set message_text = 'Offer_flight: FlightID not found.';
 		LEAVE sp_main;
     END IF;
     IF NOT EXISTS (SELECT 1 FROM airplane where airlineID = ip_support_airline and tail_num = ip_support_tail) THEN
-		-- signal sqlstate '45000' set message_text = 'Airplane does not exist';
+		signal sqlstate '45000' set message_text = 'Offer_flight: Tailnum or airline id not found';
 		LEAVE sp_main;
 	END IF;
 	IF EXISTS (SELECT 1 FROM airplane a join flight f on (a.airlineID = f.support_airline and a.tail_num = f.support_tail) where a.airlineID = ip_support_airline and a.tail_num = ip_support_tail and f.airplane_status = 'in_flight') THEN
-		-- signal sqlstate '45000' set message_text = 'Airplane is in the air, and thus cannot be offered';
-        LEAVE sp_main;
+		LEAVE sp_main;
 	END IF;
 	IF NOT EXISTS (SELECT 1 FROM route where routeID = ip_routeID) THEN
-		-- signal sqlstate '45000' set message_text = 'Route with corresponding RouteID does not exist';
+		signal sqlstate '45000' set message_text = 'Offer_flight: Route ID does not exist';
 		LEAVE sp_main;
 	END IF;
 	IF (SELECT max(sequence) from route_path where routeID = ip_routeID) <= ip_progress THEN
-		-- signal sqlstate '45000' set message_text = 'Flight nears the end of its route and thus cannot be offered';
+		signal sqlstate '45000' set message_text = 'Offer_flight: Sequence already maxed out';
 		LEAVE sp_main;
 	END IF;
 	INSERT INTO flight VALUES (ip_flightID, ip_routeID, ip_support_airline, ip_support_tail, ip_progress, 'on_ground', ip_next_time, ip_cost);
@@ -346,9 +338,8 @@ sp_main: begin
             airplane_status = 'on_ground',
             next_time = ADDTIME(next_time, '1:00:00') -- For ground time
         WHERE flightID = ip_flightID;
-	ELSE
-		-- signal sqlstate '45000' set message_text = 'Flight is not in the air and thus cannot be landed';
-		leave sp_main;
+	ELSE 
+		signal sqlstate '45000' set message_text = 'Flight_landing: Flight with associated ID not in_flight';
     END IF;
 
 end //
@@ -389,14 +380,18 @@ sp_main: begin
     DECLARE temp_distance INT;
     DECLARE temp_flight_time INT; #Minutes
 	IF EXISTS (SELECT 1 FROM flight WHERE flightID = ip_flightID) THEN
-        SELECT airplane_status, support_tail, progress, routeID  INTO temp_airplane_status, temp_support_tail, temp_current_progress, temp_routeID FROM flight WHERE flightID = ip_flightID;
+        SELECT airplane_status, support_tail, progress, routeID INTO temp_airplane_status, temp_support_tail, temp_current_progress, temp_routeID FROM flight WHERE flightID = ip_flightID;
+	ELSE
+		signal sqlstate '45000' set message_text = 'Flight_takeoff: FlightID not found';
+		LEAVE sp_main;
+	END IF;
 	IF temp_airplane_status != 'on_ground' THEN
-		-- signal sqlstate '45000' set message_text = 'Flight does not exist or is not on the ground';
+		signal sqlstate '45000' set message_text = 'Flight_takeoff: Airplane not on ground';
         LEAVE sp_main;
     END IF;
         SELECT COUNT(*) INTO temp_total_legs FROM route_path WHERE routeID = temp_routeID;
     IF temp_current_progress >= temp_total_legs THEN
-		-- signal sqlstate '45000' set message_text = 'Flight has no more legs to fly';
+		signal sqlstate '45000' set message_text = 'Flight_takeoff: Airplane progress exceeds route legs amount';
         LEAVE sp_main;
     END IF;
     SELECT plane_type, speed INTO temp_plane_type, temp_speed FROM airplane WHERE tail_num = temp_support_tail;
@@ -420,8 +415,6 @@ sp_main: begin
         UPDATE flight
 		SET airplane_status = 'in_flight', progress = progress + 1, next_time = DATE_ADD(next_time, INTERVAL temp_flight_time MINUTE)
 		WHERE flightID = ip_flightID;
-	END IF;
-
 end //
 delimiter ;
 
@@ -435,99 +428,98 @@ must be enough seats to accommodate all boarding passengers. */
 -- -----------------------------------------------------------------------------
 drop procedure if exists passengers_board;
 delimiter //
-create procedure passengers_board (in ip_flightID varchar(50))
-sp_main: begin
+CREATE PROCEDURE process_passenger_boarding(
+    IN ip_flight_id VARCHAR(50)
+)
+	sp_main: BEGIN
+	declare v_routeID varchar(50);
+	declare v_support_airline varchar(50);
+	declare v_support_tail varchar(50);
+	declare v_progress int;
+	declare v_cost int;
+	declare v_seat_capacity int;
+	declare v_legID varchar(50);
+	declare v_departure varchar(50);
+	declare v_arrival varchar(50);
+	declare v_departure_locationID varchar(50);
+	declare v_arrival_locationID varchar(50);
+	declare v_locationID varchar(50);
+	declare v_boarding_count int;
+	declare v_current_onboard int;
+	declare v_total_legs int; 
+	declare v_flight_exists int;
 
-	declare flight_exists int;
-    declare ag_status varchar(100);
-    declare legs_tobe int;
-    declare current_leg int;
-    declare seats int;
-    declare current_airport varchar(50);
-    declare arrival_airport varchar(50);
-    declare flight_loc varchar(50);
-    declare count_passengers int;
+	-- Flight existence check
+	SELECT count(*) INTO v_flight_exists FROM flight WHERE flightID = ip_flightID;
+	IF flight_exists = 0 THEN 
+		signal sqlstate '45000' set message_text = 'Passengers_board: Flight does not exist';
+		LEAVE sp_main;
 
-	-- Ensure the flight exists
-    select count(*) into flight_exists from flight where flightID = ip_flightID;
-    if flight_exists = 0 then 
-		-- signal sqlstate '45000' set message_text = 'Flight does not exist';
-		leave sp_main;
-	end if;
-    
-    -- Ensure that the flight is on the ground
-    if not exists (
-         select 1
-         from flight
-         where flightID = ip_flightID and airplane_status = 'on_ground'
-    ) then
-		-- signal sqlstate '45000' set message_text = 'Flight is not on the ground';
-         leave sp_main;
-    end if;
-    
-    -- Ensure that the flight has further legs to be flown
-    select count(routeID) into legs_tobe from route_path where routeID
-    in (select routeID from flight where flightID = ip_flightID);
-    
-    select progress into current_leg from flight where flightID = ip_flightID;
-    
-    if current_leg = legs_tobe then
-		-- signal sqlstate '45000' set message_text = 'Flight has no remaining legs to be flown';
-		leave sp_main;
-	end if;
-    
-    -- Determine the number of passengers attempting to board the flight
-    -- Use the following to check:
-		-- The airport the airplane is currently located at
-	select l.departure into current_airport 
-    from flight b join route_path a ON a.routeID = b.routeID
-    join leg l ON l.legID = a.legID
-    where b.flightID = ip_flightID and a.sequence = b.progress + 1;
+	 -- Check if flight is grounded
+	 ELSEIF (SELECT airplane_status FROM flight WHERE flightID = ip_flightID) != 'on_ground' THEN 
+			signal sqlstate '45000' set message_text = 'Passengers_board: Flight not grounded';
 
-        
-        -- The passengers are located at that airport
-        -- The passenger's immediate next destination matches that of the flight
-	select l.arrival into arrival_airport from flight b
-	join route_path a on b.routeID = a.routeID
-	join leg l on a.legID = l.legID where b.flightID = ip_flightID
-	and a.sequence = b.progress + 1;
-        
-        -- The passenger has enough funds to afford the flight
-	select count(p.personID) into count_passengers from person p join
-	airport c on c.locationID = p.locationID join passenger_vacations
-	pv on p.personID = pv.personID join passenger pass on pass.personID = p.personID 
-	where c.airportID = current_airport and pv.airportID = arrival_airport and pass.funds >= 
-	(select cost from flight where flightID = ip_flightID);
-        
-	-- Check if there enough seats for all the passengers
-		-- If not, do not add board any passengers
-        -- If there are, board them and deduct their funds
-	select d.seat_capacity into seats from flight b
-	join airplane d on b.support_tail = d.tail_num
-	where b.flightID = ip_flightID;
-    
-	if count_passengers > seats then
-		leave sp_main;
-	end if;
-        
-	-- Get flight location info
-	select d.locationID into flight_loc from flight b
-	join airplane d on b.support_tail = d.tail_num
-    where b.flightID = ip_flightID;
-    
-    -- update location
-	update person set locationID = flight_loc where locationID = (
-    select locationID
-    from airport c
-    where airportID = current_airport);
-    
-    -- Update passenger's funds based on the flight cost
-	update passenger pass join person p on pass.personID = p.personID
-	set pass.funds = pass.funds - (select cost from flight where flightID = ip_flightID) 
-    where p.locationID = flight_loc;
+		LEAVE sp_main; 
+     
+	 -- Do further legs exist?
+	 SELECT progress INTO v_progress FROM flight WHERE flightID = ip_flightID; 
+	 SELECT count(*) INTO v_total_legs FROM route_path WHERE routeID = (SELECT routeID FROM flight WHERE flightID = ip_flightID); 
+	 ELSEIF v_progress >= v_total_legs THEN 
+		signal sqlstate '45000' set message_text = 'Passengers_board: Progress exceeds total legs';
+		LEAVE sp_main;
+	 END IF; 
+	 
+	 -- Flight information
+	 SELECT routeID, support_airline, support_tail, progress, cost INTO v_routeID, v_support_airline, v_support_tail, v_progress, v_cost FROM flight WHERE flightID = ip_flightID; 
+	 SELECT seat_capacity, locationID INTO v_seat_capacity, v_locationID FROM airplane WHERE airlineID = v_support_airline AND tail_num = v_support_tail; 
+	 SELECT legID INTO v_legID FROM route_path WHERE routeID = v_routeID AND sequence = v_progress + 1; 
+	 
+	 -- Arrival and departure details
+	 SELECT arrival, departure INTO v_arrival, v_departure FROM leg WHERE legID = v_legID; 
+	 SELECT locationID INTO v_arrival_locationID FROM airport WHERE airportID = v_arrival; 
+	 SELECT locationID INTO v_departure_locationID FROM airport WHERE airportID = v_departure; 
+	 
+	 SELECT count(*) INTO v_boarding_count 
+	 FROM person pe
+	 JOIN passenger_vacations pv ON pe.personID = pv.personID 
+	 JOIN passenger pa ON pe.personID = pa.personID 
+	 WHERE pe.locationID = v_departure_locationID
+	 AND pv.sequence = 1 
+	 AND pv.airportID = v_arrival
+	 AND pa.funds >= v_cost; 
+	 
+	 -- Are there enough seats?
+	 IF v_boarding_count > v_seat_capacity THEN
+		signal sqlstate '45000' set message_text = 'Passengers_board: Not enough seats';
+		LEAVE sp_main; 
+	 ELSE
+	 UPDATE person p 
+	 JOIN passenger_vacations pv ON p.personID = pv.personID 
+	 JOIN passenger pa ON p.personID = pa.personID 
+	 SET p.locationID = v_locationID 
+	 WHERE p.locationID = v_departure_locationID 
+	 AND pv.sequence = 1 
+	 AND pv.airportID = v_arrival 
+	 AND pa.funds >= v_cost; 
+	 
+	 -- Remove funds
+	 UPDATE passenger pa 
+	 JOIN person p ON pa.personID = p.personID 
+	 JOIN passenger_vacations pv ON p.personID = pv.personID 
+	 SET pa.funds = pa.funds - v_cost 
+	 WHERE p.locationID = v_locationID 
+	 AND pv.sequence = 1 
+	 AND pv.airportID = v_arrival; 
+	  
+	 -- Edit seat availability
+	 UPDATE airplane 
+	 SET seat_capacity = seat_capacity - v_boarding_count 
+	 WHERE airlineID = v_support_airline AND tail_num = v_support_tail; 
+	 END IF; 
+	 
+	 END // 
+	 delimiter ;
 
-end //
-delimiter ;
 
 -- [9] passengers_disembark()
 -- -----------------------------------------------------------------------------
@@ -556,7 +548,7 @@ sp_main: begin
          from flight
          where flightID = ip_flightID and airplane_status = 'on_ground'
     ) then
-		-- signal sqlstate '45000' set message_text = 'Flight does not exist or is not on the ground';
+		 signal sqlstate '45000' set message_text = 'Passengers_disembark: Flight not on ground or flight does not exist';
          leave sp_main;
     end if;
     
@@ -664,20 +656,20 @@ sp_main: begin
     if (ip_flightID is null
 		or
         not exists (select 1 from airplane where airlineID = plane_airlineID and tail_num = tail_no)) then
-        -- signal sqlstate '45000' set message_text = 'Flight does not exist or the ID is not, which is not allowed';
+		 signal sqlstate '45000' set message_text = 'Assign_pilot: airlineID not found or tail_num not found';
         leave sp_main;
 	end if;
 	
 
 	-- Ensure the flight is on the ground
     if ((select airplane_status from flight where flightID = ip_flightID) not like 'on_ground') then
-		-- signal sqlstate '45000' set message_text = 'Flight is not on the ground, and thus cannot disembark';
+		 signal sqlstate '45000' set message_text = 'Assign_pilot: Flight not on ground';
         leave sp_main;
 	end if;
 	
 	-- Ensure that the flight has further legs to be flown
     if (not has_remaining_legs(ip_flightID)) then
-		-- signal sqlstate '45000' set message_text = 'Flight does not have any remaining legs to fly';
+		 signal sqlstate '45000' set message_text = 'Assign_pilot: Remaining legs not found';
 		leave sp_main;
     end if;
 
@@ -686,26 +678,26 @@ sp_main: begin
 	where airlineID = plane_airlineID and tail_num = tail_no;
     
 	if not exists (select 1 from airplane where airlineID = plane_airlineID and tail_num = tail_no) then
-		-- signal sqlstate '45000' set message_text = 'Associated airplane does not exist';
+		signal sqlstate '45000' set message_text = 'Assign_pilot: AirlineID and Tailnum combination not found';
 		leave sp_main;
 	end if;
 	
 	-- Ensure that the pilot exists...
 	if not exists (select 1 from pilot where personID = ip_personID) then
-		-- signal sqlstate '45000' set message_text = 'Pilot does not exist';
+		signal sqlstate '45000' set message_text = 'Assign_pilot: Person with associated personID not found';
 		leave sp_main;
 	end if;
 
 	-- ...and is not already assigned
 	if ((select commanding_flight from pilot where personID = ip_personID) is not null) then
-		-- signal sqlstate '45000' set message_text = 'Pilot is already assigned';
+		signal sqlstate '45000' set message_text = 'Assign_pilot: Pilot already assigned';
 		leave sp_main;
 	end if;
 
 	-- Ensure that the pilot has the appropriate license - ERROR
 	select count(*) into license_count from pilot_licenses where personID = ip_personID and ((airplane_type is null and license is null) or license = airplane_type);
 	if license_count = 0 then
-		-- signal sqlstate '45000' set message_text = 'Pilot does not have an appropriate license';
+		signal sqlstate '45000' set message_text = 'Assign_pilot: Pilot has no liscense';
 		leave sp_main;
 	end if;
     
@@ -718,7 +710,7 @@ sp_main: begin
     
 	-- Ensure the pilot is located at the airport of the plane that is supporting the flight
 	if ((select locationID from person where personID = ip_personID) <> airport_location) then
-		-- signal sqlstate '45000' set message_text = 'Pilot is not located at the airport of the plane that supports the flight';
+		signal sqlstate '45000' set message_text = 'Assign_pilot: Pilot is not at location supporting the flight';
 		leave sp_main;
 	end if;
 
@@ -782,9 +774,6 @@ sp_main: begin
          join flight f on p.commanding_flight = f.flightID
          set p.commanding_flight = null
          where f.flightID = ip_flightID;
-	else
-		-- signal sqlstate '45000' set message_text = 'Flight is not on the ground, doesn't have any remaining legs to be flown OR is not empty of passengers';
-		leave sp_main;
     end if;
 
 end //
@@ -814,7 +803,8 @@ sp_main: begin
 
 	-- Ensure that the flight is on the ground
     if f_status != 'on_ground' then
-		-- signal sqlstate '45000' set message_text = 'Flight does not exist or is not on the ground';
+    		signal sqlstate '45000' set message_text = 'Retire flight: flight is not on the ground';
+
         leave sp_main;
     end if;
     
@@ -823,7 +813,8 @@ sp_main: begin
 	from route_path where routeID = (select routeID from flight where flightID = ip_flightID);
 
     if progress !=  0 and progress != leg_max then
-		-- signal sqlstate '45000' set message_text = 'Flight does not have remaining legs to be flown';
+    		signal sqlstate '45000' set message_text = 'Retire flight: Flight has more legs to fly';
+
         leave sp_main; 
     end if;
     
@@ -838,7 +829,8 @@ sp_main: begin
      where locationID = loco;
 
     if passengers > 0 then
-		-- signal sqlstate '45000' set message_text = 'There are passengers left in the flight';
+    		signal sqlstate '45000' set message_text = 'Retire flight: Passengers still exist';
+
         leave sp_main;  
     end if;
 
@@ -847,7 +839,8 @@ sp_main: begin
      where locationID = loco;
 
     if pilots > 0 then
-		-- signal sqlstate '45000' set message_text = 'There are pilots left in the flight';
+    		signal sqlstate '45000' set message_text = 'Retire flight: More than 0 pilots';
+
         leave sp_main;  
     end if;
     
@@ -906,7 +899,8 @@ sp_main: begin
 	select flightID into next_flightID from landing_prio_flights order by flightID limit 1;
 	
 	if next_flightID is null then
-		-- signal sqlstate '45000' set message_text = 'Could not find a valid next flight to process';
+    		signal sqlstate '45000' set message_text = 'Simulation Cycle: next flight ID is null';
+
 		leave sp_main;
 	end if;
     
