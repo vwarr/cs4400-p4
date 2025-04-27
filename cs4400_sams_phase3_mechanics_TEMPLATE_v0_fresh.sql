@@ -56,14 +56,17 @@ sp_main: begin
 	declare tracker int;
     
 	IF NOT EXISTS (SELECT 1 FROM airline where airlineID = ip_airlineID) THEN
+		-- signal sqlstate '45000' set message_text = 'Associated airline does not exist';
 		LEAVE sp_main;
 	END IF;
     IF (ip_airlineID is null or ip_tail_num is null) THEN
+		-- signal sqlstate '45000' set message_text = 'Neither airline ID nor tail num can be null';
 		LEAVE sp_main;
 	END IF;
     
 	-- Ensure that the plane type is valid: Boeing, Airbus, or neither
     if ip_plane_type not in ('Boeing', 'Airbus') or ip_plane_type is Null then
+		-- signal sqlstate '45000' set message_text = 'Plane type must be Boeing, Airbus, or neither';
 		leave sp_main;
 	end if;
     
@@ -72,15 +75,18 @@ sp_main: begin
     select count(*) into tracker from Airplane
 	where airlineID = ip_airlineID and tail_num = ip_tail_num;
 	if tracker > 0 then
+		-- signal sqlstate '45000' set message_text = 'Airplane must be unique';
 		leave sp_main;
 	end if;
     
     if ip_seat_capacity <= 0 or ip_speed <= 0 then
+		-- signal sqlstate '45000' set message_text = 'Seat capacity and speed must be non-negative';
 		leave sp_main;
 	end if;
     
     select count(*) into tracker from Location where locationID = ip_locationID;
 	if tracker > 0 then
+		-- signal sqlstate '45000' set message_text = 'Location ID must be unique';
 		leave sp_main;
 	end if;
     
@@ -112,13 +118,29 @@ sp_main: begin
 	-- Ensure that the airport and location values are new and unique
     -- Add airport and location into respective tables
 
-    if ip_airportID is NULL or ip_airportID = '' or ip_locationID is NULL or ip_locationID = '' or ip_city is NULL or ip_state is NULL or ip_country is NULL or ip_city = '' or ip_state = '' or ip_country = '' then
-    leave sp_main;
+    if ip_airportID is NULL or ip_airportID = '' then
+		-- signal sqlstate '45000' set message_text = 'Airport ID cannot be null nor empty';
+        leave sp_main;
+    elseif ip_locationID is NULL or ip_locationID = '' then
+		-- signal sqlstate '45000' set message_text = 'Location ID cannot be null nor empty';
+        leave sp_main;
+    elseif ip_city is NULL or ip_city = '' then
+		-- signal sqlstate '45000' set message_text = 'City cannot be null nor empty';
+        leave sp_main;
+    elseif ip_state is NULL or ip_state = '' then
+		-- signal sqlstate '45000' set message_text = 'State cannot be null nor empty';
+        leave sp_main;
+    elseif ip_country is NULL or ip_country = '' then
+		-- signal sqlstate '45000' set message_text = 'Country cannot be null nor empty';
+        leave sp_main;
     end if;
     
     if (not exists (select 1 from airport where airportID = ip_airportID)) and (not exists (select 1 from location where locationID = ip_locationID)) THEN
-	insert into location(locationID)VALUES(ip_locationID);
-    insert into airport(airportID, airport_name, city, state, country, locationID)VALUES(ip_airportID, ip_airport_name, ip_city, ip_state, ip_country, ip_locationID);
+		insert into location(locationID)VALUES(ip_locationID);
+		insert into airport(airportID, airport_name, city, state, country, locationID)VALUES(ip_airportID, ip_airport_name, ip_city, ip_state, ip_country, ip_locationID);
+	else
+		-- signal sqlstate '45000' set message_text = 'Airpot and location must be new and unique';
+		leave sp_main;
 	END IF;
 
 end //
