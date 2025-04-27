@@ -47,6 +47,11 @@
                 <button type="button" onclick="window.location.href='/'">Cancel</button>
                 <button type="submit">Submit</button>
             </div>
+            {% if success == False %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
         </div>
     </form>
 </body>

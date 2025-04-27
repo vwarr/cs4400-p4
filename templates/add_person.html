@@ -56,6 +56,11 @@
                 <button type="cancel">Cancel</button>
                 <button type="submit">Add</button>
             </div>
+            {% if success == False %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
         </div>
     </form>
 </body>
