@@ -36,7 +36,6 @@ def index():
 def api_add_airplane():
     if request.method == 'GET':
         return render_template('add_airplane.html')
-
     data = request.form
     missing = [f for f in ('airlineID', 'tail_num', 'seat_capacity', 'speed') if not data.get(f)]
     if missing:
@@ -93,6 +92,8 @@ def api_add_airport():
                                success=False,
                                error="country code must be 3 characters")
 
+    replace_null_strings(data)
+    
     args = [
         data['airportID'],
         data.get('airport_name') or None,
@@ -101,7 +102,6 @@ def api_add_airport():
         data['country'],
         data.get('locationID') or None
     ]
-
     try:
         g.db_cursor.callproc('add_airport', args)
         g.db_conn.commit()
@@ -427,6 +427,13 @@ def route_summary():
         print(e)
         return render_template('route_summary.html', error=str(e))
     
+def replace_null_strings(d):
+    for key, value in d.items():
+        if isinstance(value, str) and value.strip().lower() == 'null':
+            d[key] = None
+    return d
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
