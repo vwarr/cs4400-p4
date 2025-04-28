@@ -1135,4 +1135,4 @@ sp_main: begin
 		return true;
 	end if;
 end //
-delimiter
+delimiter ;
