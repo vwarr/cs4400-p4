@@ -10,57 +10,59 @@
 <body>
     <h1>add_person()</h1>
     <form class="form_wrapper" action="/add_person" method="POST">
-        <div class='form_content'>
-            <div class="form_container">
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="personID">Person ID:</label>
-                        <input id="personID" type="text" name="personID" placeholder="p61">
+        <div class="form_box">
+            <div class='form_content'>
+                <div class="form_container">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="personID">Person ID:</label>
+                            <input id="personID" type="text" name="personID" placeholder="p61">
+                        </div>
+                        <div class="form_group">
+                            <label for="locationID">Location ID:</label>
+                            <input id="locationID" type="text" name="locationID" placeholder="port_1">
+                        </div>
+                        <div class="form_group">
+                            <label for="miles">Miles:</label>
+                            <input id="miles" type="number" name="miles" placeholder="NULL">
+                        </div>
                     </div>
-                    <div class="form_group">
-                        <label for="locationID">Location ID:</label>
-                        <input id="locationID" type="text" name="locationID" placeholder="port_1">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="first_name">First Name:</label>
+                            <input id="first_name" type="text" name="first_name" placeholder="Sabrina">
+                        </div>
+                        <div class="form_group">
+                            <label for="taxID">Tax ID:</label>
+                            <input id="taxID" type="text" name="taxID" maxlength="11"
+                            pattern="\d{3}-\d{2}-\d{4}" placeholder="123-45-6789" required />
+                        </div>
+                        <div class="form_group">
+                            <label for="funds">Funds:</label>
+                            <input id="funds" type="number" name="funds" placeholder="NULL"/>
+                        </div>
                     </div>
-                    <div class="form_group">
-                        <label for="miles">Miles:</label>
-                        <input id="miles" type="number" name="miles" placeholder="NULL">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="last_name">Last Name:</label>
+                            <input id="last_name" type="text" name="last_name" placeholder="Duncan">
+                        </div>
+                        <div class="form_group">
+                            <label for="experience">Location ID:</label>
+                            <input id="experience" type="number" name="experience" placeholder="27">
+                        </div>
                     </div>
                 </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="first_name">First Name:</label>
-                        <input id="first_name" type="text" name="first_name" placeholder="Sabrina">
-                    </div>
-                    <div class="form_group">
-                        <label for="taxID">Tax ID:</label>
-                        <input id="taxID" type="text" name="taxID" maxlength="11"
-                         pattern="\d{3}-\d{2}-\d{4}" placeholder="123-45-6789" required />
-                    </div>
-                    <div class="form_group">
-                        <label for="funds">Funds:</label>
-                        <input id="funds" type="number" name="funds" placeholder="NULL"/>
-                    </div>
+                <div class="form_buttons">
+                    <button type="button" onclick="window.location.href='/'">Cancel</button>
+                    <button type="submit">Add</button>
                 </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="last_name">Last Name:</label>
-                        <input id="last_name" type="text" name="last_name" placeholder="Duncan">
-                    </div>
-                    <div class="form_group">
-                        <label for="experience">Location ID:</label>
-                        <input id="experience" type="number" name="experience" placeholder="27">
-                    </div>
+                {% if success == False %}
+                <div class="error-message">
+                    {{ error }}
                 </div>
+                {% endif %}
             </div>
-            <div class="form_buttons">
-                <button type="button" onclick="window.location.href='/'">Cancel</button>
-                <button type="submit">Add</button>
-            </div>
-            {% if success == False %}
-            <div class="error-message">
-                {{ error }}
-            </div>
-            {% endif %}
         </div>
     </form>
 </body>

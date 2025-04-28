@@ -10,75 +10,77 @@
 <body>
     <h1>add_airplane()</h1>
     <form class="form_wrapper" action="/add_airplane" method="POST">
-        <div class='form_content'>
-            <div class="form_container">
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="airlineID">Airline ID:</label>
-                        <input id="airlineID" type="text" name="airlineID" placeholder="United">
+        <div class="form_box">
+            <div class='form_content'>
+                <div class="form_container">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="airlineID">Airline ID:</label>
+                            <input id="airlineID" type="text" name="airlineID" placeholder="United">
+                        </div>
+                        <div class="form_group">
+                            <label for="speed">Speed:</label>
+                            <input id="speed" type="number" name="speed" placeholder="345">
+                        </div>
+                        <div class="form_group">
+                            <label for="maintenanced">Maintained:</label>
+                            <select id="maintenanced" list="maintenanced_options" name="maintenanced" placeholder="Null">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                                <option value="Null">Null</option>
+                            </select>
+                        </div>
+                        <div class="form_group">
+                            <label for="neo">Neo:</label>
+                            <select id="neo" type="text" name="neo" placeholder="TRUE">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                                <option value="Null">Null</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form_group">
-                        <label for="speed">Speed:</label>
-                        <input id="speed" type="number" name="speed" placeholder="345">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="tail_num">Tail Num:</label>
+                            <input id="tail_num" type="text" name="tail_num" maxlength="6" placeholder="nk780b">
+                        </div>
+                        <div class="form_group">
+                            <label for="locationID">Location ID:</label>
+                            <input id="locationID" type="text" name="locationID" placeholder="port 190">
+                        </div>
+                        <div class="form_group">
+                            <label for="model">Model:</label>
+                            <input id="model" list="model_options" name="model" placeholder="Null">
+                            <datalist id="model_options">
+                                <option value="Null">
+                            </datalist>
+                        </div>
                     </div>
-                    <div class="form_group">
-                        <label for="maintenanced">Maintained:</label>
-                        <select id="maintenanced" list="maintenanced_options" name="maintenanced" placeholder="Null">
-                            <option value="True">True</option>
-                            <option value="False">False</option>
-                            <option value="Null">Null</option>
-                        </select>
-                    </div>
-                    <div class="form_group">
-                        <label for="neo">Neo:</label>
-                        <select id="neo" type="text" name="neo" placeholder="TRUE">
-                            <option value="True">True</option>
-                            <option value="False">False</option>
-                            <option value="Null">Null</option>
-                        </select>
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="seat_capacity">Seat Cap:</label>
+                            <input id="seat_capacity" type="number" name="seat_capacity" placeholder="120">
+                        </div>
+                        <div class="form_group">
+                            <label for="plane_type">Plane Type:</label>
+                            <select id="plane_type" list="plane_type_options" name="plane_type" placeholder="Airbus">
+                                <option value="Airbus">Airbus</option>
+                                <option value="Boeing">Boeing</option>
+                                <option value="Null">Null</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="tail_num">Tail Num:</label>
-                        <input id="tail_num" type="text" name="tail_num" placeholder="nk780b">
-                    </div>
-                    <div class="form_group">
-                        <label for="locationID">Location ID:</label>
-                        <input id="locationID" type="text" name="locationID" placeholder="port 190">
-                    </div>
-                    <div class="form_group">
-                        <label for="model">Model:</label>
-                        <input id="model" list="model_options" name="model" placeholder="Null">
-                        <datalist id="model_options">
-                            <option value="Null">
-                        </datalist>
-                    </div>
+                <div class="form_buttons">
+                    <button type="button" onclick="window.location.href='/'">Cancel</button>
+                    <button type="submit">Submit</button>
                 </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="seat_capacity">Seat Cap:</label>
-                        <input id="seat_capacity" type="number" name="seat_capacity" placeholder="120">
-                    </div>
-                    <div class="form_group">
-                        <label for="plane_type">Plane Type:</label>
-                        <select id="plane_type" list="plane_type_options" name="plane_type" placeholder="Airbus">
-                            <option value="Airbus">Airbus</option>
-                            <option value="Boeing">Boeing</option>
-                            <option value="Null">Null</option>
-                        </select>
-                    </div>
+                {% if success == False %}
+                <div class="error-message">
+                    {{ error }}
                 </div>
+                {% endif %}
             </div>
-            <div class="form_buttons">
-                <button type="button" onclick="window.location.href='/'">Cancel</button>
-                <button type="submit">Submit</button>
-            </div>
-            {% if success == False %}
-            <div class="error-message">
-                {{ error }}
-            </div>
-            {% endif %}
         </div>
     </form>
 </body>

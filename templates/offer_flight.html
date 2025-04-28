@@ -10,46 +10,48 @@
 <body>
     <h1>offer_flight()</h1>
     <form class="form_wrapper" action="/offer_flight" method="POST">
-        <div class='form_content'>
-            <div class="form_container">
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="flightID">Flight ID:</label>
-                        <input id="flightID" type="text" name="flightID" placeholder="un_41">
+        <div class="form_box">
+            <div class='form_content'>
+                <div class="form_container">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="flightID">Flight ID:</label>
+                            <input id="flightID" type="text" name="flightID" placeholder="un_41">
+                        </div>
+                        <div class="form_group">
+                            <label for="progress">Progress:</label>
+                            <input id="progress" type="number" name="progress" placeholder="0">
+                        </div>
+                        <div class="form_group">
+                            <label for="cost">Cost:</label>
+                            <input id="cost" type="number" name="cost" placeholder="400">
+                        </div>
                     </div>
-                    <div class="form_group">
-                        <label for="progress">Progress:</label>
-                        <input id="progress" type="number" name="progress" placeholder="0">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="routeID">Route ID:</label>
+                            <input id="routeID" type="text" name="routeID" placeholder="americas_three">
+                        </div>
+                        <div class="form_group">
+                            <label for="next_time">Next Time:</label>
+                            <input id="next_time" type="date" name="next_time" placeholder="11:30:00">
+                        </div>
                     </div>
-                    <div class="form_group">
-                        <label for="cost">Cost:</label>
-                        <input id="cost" type="number" name="cost" placeholder="400">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="support_airline">Support Airline:</label>
+                            <input id="support_airline" type="text" name="support_airline" placeholder="United">
+                        </div>
+                        <div class="form_group">
+                            <label for="support_tail">Support Tail:</label>
+                            <input id="support_tail" type="text" name="support_tail" placeholder="n330ss">
+                        </div>
                     </div>
                 </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="routeID">Route ID:</label>
-                        <input id="routeID" type="text" name="routeID" placeholder="americas_three">
-                    </div>
-                    <div class="form_group">
-                        <label for="next_time">Next Time:</label>
-                        <input id="next_time" type="date" name="next_time" placeholder="11:30:00">
-                    </div>
+                <div class="form_buttons">
+                    <button type="button" onclick="window.location.href='/'">Cancel</button>
+                    <button type="submit">Add</button>
                 </div>
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="support_airline">Support Airline:</label>
-                        <input id="support_airline" type="text" name="support_airline" placeholder="United">
-                    </div>
-                    <div class="form_group">
-                        <label for="support_tail">Support Tail:</label>
-                        <input id="support_tail" type="text" name="support_tail" placeholder="n330ss">
-                    </div>
-                </div>
-            </div>
-            <div class="form_buttons">
-                <button type="button" onclick="window.location.href='/'">Cancel</button>
-                <button type="submit">Add</button>
             </div>
         </div>
     </form>

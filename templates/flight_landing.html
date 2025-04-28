@@ -10,18 +10,20 @@
 <body>
     <h1>flight_landing()</h1>
     <form class="form_wrapper" action="/flight_landing" method="POST">
-        <div class='form_content'>
-            <div class="form_container">
-                <div class='form_column'>
-                    <div class="form_group">
-                        <label for="flightID">Flight ID:</label>
-                        <input id="flightID" type="text" name="flightID" placeholder="dl_10">
+        <div class="form_box">
+            <div class='form_content'>
+                <div class="form_container">
+                    <div class='form_column'>
+                        <div class="form_group">
+                            <label for="flightID">Flight ID:</label>
+                            <input id="flightID" type="text" name="flightID" placeholder="dl_10">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form_buttons">
-                <button type="button" onclick="window.location.href='/'">Cancel</button>
-                <button type="submit">Land</button>
+                <div class="form_buttons">
+                    <button type="button" onclick="window.location.href='/'">Cancel</button>
+                    <button type="submit">Land</button>
+                </div>
             </div>
         </div>
     </form>
