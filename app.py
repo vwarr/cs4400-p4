@@ -211,123 +211,157 @@ def api_offer_flight():
         return render_template('offer_flight.html', success=False,
                                error=handler.handle_db_error(e))
 
-@app.route('/flight_landing', methods=['POST', 'GET'])
+@app.route('/flight_landing', methods=['GET', 'POST'])
 def api_flight_landing():
     if request.method == 'GET':
         return render_template('flight_landing.html')
+    fid = request.form.get('flightID')
+    if not fid:
+        return render_template('flight_landing.html', success=False,
+                               error='Missing flightID')
+    if len(fid) > 50:
+        return render_template('flight_landing.html', success=False,
+                               error='flightID too long')
     try:
-        print("flight_landing")
-        data = request.form
-        g.db_cursor.callproc('flight_landing', [data['flightID']])
+        g.db_cursor.callproc('flight_landing', [fid])
         g.db_conn.commit()
         return render_template('flight_landing.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('flight_landing.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('flight_landing.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/flight_takeoff', methods=['POST', 'GET'])
+@app.route('/flight_takeoff', methods=['GET', 'POST'])
 def api_flight_takeoff():
     if request.method == 'GET':
         return render_template('flight_takeoff.html')
+    fid = request.form.get('flightID')
+    if not fid:
+        return render_template('flight_takeoff.html', success=False,
+                               error='Missing flightID')
+    if len(fid) > 50:
+        return render_template('flight_takeoff.html', success=False,
+                               error='flightID too long')
     try:
-        print("flight_takeoff")
-        data = request.form
-        g.db_cursor.callproc('flight_takeoff', [data['flightID']])
+        g.db_cursor.callproc('flight_takeoff', [fid])
         g.db_conn.commit()
         return render_template('flight_takeoff.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('flight_takeoff.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('flight_takeoff.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/passengers_board', methods=['POST', 'GET'])
+@app.route('/passengers_board', methods=['GET', 'POST'])
 def api_passengers_board():
     if request.method == 'GET':
         return render_template('passengers.board.html')
+    fid = request.form.get('flightID')
+    if not fid:
+        return render_template('passengers.board.html', success=False,
+                               error='Missing flightID')
+    if len(fid) > 50:
+        return render_template('passengers.board.html', success=False,
+                               error='flightID too long')
     try:
-        print("passengers_board")
-        data = request.form
-        g.db_cursor.callproc('passengers_board', [data['flightID']])
+        g.db_cursor.callproc('passengers_board', [fid])
         g.db_conn.commit()
         return render_template('passengers.board.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('passengers.board.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('passengers.board.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/passengers_disembark', methods=['POST', 'GET'])
+@app.route('/passengers_disembark', methods=['GET', 'POST'])
 def api_passengers_disembark():
     if request.method == 'GET':
         return render_template('passengers.disembark.html')
+    fid = request.form.get('flightID')
+    if not fid:
+        return render_template('passengers.disembark.html', success=False,
+                               error='Missing flightID')
+    if len(fid) > 50:
+        return render_template('passengers.disembark.html', success=False,
+                               error='flightID too long')
     try:
-        print("disembark")
-        data = request.form
-        g.db_cursor.callproc('passengers_disembark', [data['flightID']])
+        g.db_cursor.callproc('passengers_disembark', [fid])
         g.db_conn.commit()
         return render_template('passengers.disembark.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('passengers.disembark.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('passengers.disembark.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/assign_pilot', methods=['POST', 'GET'])
+@app.route('/assign_pilot', methods=['GET', 'POST'])
 def api_assign_pilot():
     if request.method == 'GET':
         return render_template('assign_pilot.html')
+    data = request.form
+    missing = [f for f in ('flightID', 'personID') if not data.get(f)]
+    if missing:
+        return render_template('assign_pilot.html', success=False,
+                               error='Missing fields: ' + ', '.join(missing))
+    fid = data['flightID']
+    pid = data['personID']
+    if len(fid) > 50 or len(pid) > 50:
+        return render_template('assign_pilot.html', success=False,
+                               error='IDs must be ≤50 chars')
     try:
-        print("assign_pilot")
-        data = request.form
-        g.db_cursor.callproc('assign_pilot', [data['flightID'], data['personID']])
+        g.db_cursor.callproc('assign_pilot', [fid, pid])
         g.db_conn.commit()
         return render_template('assign_pilot.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('assign_pilot.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('assign_pilot.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/recycle_crew', methods=['POST', 'GET'])
+@app.route('/recycle_crew', methods=['GET', 'POST'])
 def api_recycle_crew():
     if request.method == 'GET':
         return render_template('recycle_crew.html')
+    fid = request.form.get('flightID')
+    if not fid:
+        return render_template('recycle_crew.html', success=False,
+                               error='Missing flightID')
+    if len(fid) > 50:
+        return render_template('recycle_crew.html', success=False,
+                               error='flightID too long')
     try:
-        print("recycle_crew")
-        data = request.form
-        g.db_cursor.callproc('recycle_crew', [data['flightID']])
+        g.db_cursor.callproc('recycle_crew', [fid])
         g.db_conn.commit()
         return render_template('recycle_crew.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('recycle_crew.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('recycle_crew.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/retire_flight', methods=['POST', 'GET'])
+@app.route('/retire_flight', methods=['GET', 'POST'])
 def api_retire_flight():
     if request.method == 'GET':
         return render_template('retire_flight.html')
+    fid = request.form.get('flightID')
+    if not fid:
+        return render_template('retire_flight.html', success=False,
+                               error='Missing flightID')
+    if len(fid) > 50:
+        return render_template('retire_flight.html', success=False,
+                               error='flightID too long')
     try:
-        print("ret_flight")
-        data = request.form
-        g.db_cursor.callproc('retire_flight', [data['flightID']])
+        g.db_cursor.callproc('retire_flight', [fid])
         g.db_conn.commit()
         return render_template('retire_flight.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('retire_flight.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('retire_flight.html', success=False,
+                               error=handler.handle_db_error(e))
 
-@app.route('/simulation_cycle', methods=['POST', 'GET'])
+@app.route('/simulation_cycle', methods=['GET', 'POST'])
 def api_simulation_cycle():
     if request.method == 'GET':
         return render_template('simulation_cycle.html')
     try:
-        print("sim cycle")
         g.db_cursor.callproc('simulation_cycle', [])
         g.db_conn.commit()
         return render_template('simulation_cycle.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('simulation_cycle.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('simulation_cycle.html', success=False,
+                               error=handler.handle_db_error(e))
 
 @app.route('/alternate_airports', methods=['POST', 'GET'])
 def alternate_airports():
-    print("alt airports")
     try:
-        print('flights in the air')
-        # Execute query to get data directly from the view
         g.db_cursor.execute("SELECT * FROM alternative_airports")
         airports = g.db_cursor.fetchall()
         return render_template('alternative_airports.html', airports=airports)
@@ -338,8 +372,6 @@ def alternate_airports():
 @app.route('/flights_in_the_air', methods=['GET'])
 def flights_in_the_air():
     try:
-        print('flights in the air')
-        # Execute query to get data directly from the view
         g.db_cursor.execute("SELECT * FROM flights_in_the_air")
         flights = g.db_cursor.fetchall()
         return render_template('flights_in_the_air.html', flights=flights)
@@ -351,7 +383,6 @@ def flights_in_the_air():
 def flights_on_the_ground():
     print("flights in the ground")
     try:
-        # Execute query to get data directly from the view
         g.db_cursor.execute("SELECT * FROM flights_on_the_ground")
         flights = g.db_cursor.fetchall()
         print(flights)
@@ -364,7 +395,6 @@ def flights_on_the_ground():
 def people_in_the_air():
     print("ppl in the air")
     try:
-        # Execute query to get data directly from the view
         g.db_cursor.execute("SELECT * FROM people_in_the_air")
         ppl = g.db_cursor.fetchall()
         print(ppl)
@@ -377,7 +407,6 @@ def people_in_the_air():
 def people_on_the_ground():
     print("ppl in the ground")
     try:
-        # Execute query to get data directly from the view
         g.db_cursor.execute("SELECT * FROM people_on_the_ground")
         ppl = g.db_cursor.fetchall()
         print(ppl)
@@ -390,7 +419,6 @@ def people_on_the_ground():
 def route_summary():
     print("route_summary")
     try:
-        # Execute query to get data directly from the view
         g.db_cursor.execute("SELECT * FROM route_summary")
         routes = g.db_cursor.fetchall()
         print(routes)
