@@ -428,11 +428,9 @@ must be enough seats to accommodate all boarding passengers. */
 -- -----------------------------------------------------------------------------
 drop procedure if exists passengers_board;
 delimiter //
-CREATE PROCEDURE process_passenger_boarding(
-    IN ip_flight_id VARCHAR(50)
-)
-	sp_main: BEGIN
-	declare v_routeID varchar(50);
+create procedure passengers_board (in ip_flightID varchar(50))
+sp_main: begin
+	-- Variables
 	declare v_support_airline varchar(50);
 	declare v_support_tail varchar(50);
 	declare v_progress int;
@@ -445,80 +443,107 @@ CREATE PROCEDURE process_passenger_boarding(
 	declare v_arrival_locationID varchar(50);
 	declare v_locationID varchar(50);
 	declare v_boarding_count int;
-	declare v_current_onboard int;
-	declare v_total_legs int; 
-	declare v_flight_exists int;
+	declare v_total_legs int;
+	declare v_routeID varchar(50);
+    declare v_flight_exists INT;
 
 	-- Flight existence check
 	SELECT count(*) INTO v_flight_exists FROM flight WHERE flightID = ip_flightID;
-	IF flight_exists = 0 THEN 
+	IF v_flight_exists = 0 THEN 
 		signal sqlstate '45000' set message_text = 'Passengers_board: Flight does not exist';
-		LEAVE sp_main;
+	LEAVE sp_main;
+	END IF;
 
-	 -- Check if flight is grounded
-	 ELSEIF (SELECT airplane_status FROM flight WHERE flightID = ip_flightID) != 'on_ground' THEN 
-			signal sqlstate '45000' set message_text = 'Passengers_board: Flight not grounded';
+    IF (SELECT airplane_status FROM flight WHERE flightID = ip_flightID) != 'on_ground' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Passengers_board: flight not on ground';
+        LEAVE sp_main;
+    END IF;
 
+	-- Ensure that the flight has further legs to be flown
+	SELECT progress INTO v_progress FROM flight WHERE flightID = ip_flightID;
+	SELECT COUNT(*) INTO v_total_legs FROM route_path WHERE routeID = (SELECT routeID FROM flight WHERE flightID = ip_flightID);
+	IF v_progress >= v_total_legs THEN
+		signal sqlstate '45000' set message_text = 'Passengers_board: Flight doesnt have further legs to be flown';
 		LEAVE sp_main; 
-     
-	 -- Do further legs exist?
-	 SELECT progress INTO v_progress FROM flight WHERE flightID = ip_flightID; 
-	 SELECT count(*) INTO v_total_legs FROM route_path WHERE routeID = (SELECT routeID FROM flight WHERE flightID = ip_flightID); 
-	 ELSEIF v_progress >= v_total_legs THEN 
-		signal sqlstate '45000' set message_text = 'Passengers_board: Progress exceeds total legs';
+	END IF;
+
+	#  RouteID, supp_airline, supp tail, progress, cost
+	SELECT routeID, support_airline, support_tail, progress, cost 
+	INTO v_routeID, v_support_airline, v_support_tail, v_progress, v_cost 
+	FROM flight 
+	WHERE flightID = ip_flightID;
+
+	# seat capacity, locationID
+	SELECT seat_capacity, locationID 
+	INTO v_seat_capacity, v_locationID 
+	FROM airplane 
+	WHERE airlineID = v_support_airline AND tail_num = v_support_tail;
+
+	# legid
+	SELECT legID INTO v_legID 
+	FROM route_path 
+	WHERE routeID = v_routeID AND sequence = v_progress + 1; 
+
+	# arrival, departure
+	SELECT arrival, departure 
+	INTO v_arrival, v_departure 
+	FROM leg 
+	WHERE legID = v_legID; 
+
+	# arrival location id
+	SELECT locationID INTO v_arrival_locationID 
+	FROM airport 
+	WHERE airportID = v_arrival;
+
+	# departure location id
+	SELECT locationID INTO v_departure_locationID 
+	FROM airport 
+	WHERE airportID = v_departure; 
+
+	# boarding count
+	SELECT COUNT(*) INTO v_boarding_count
+	FROM person p
+	JOIN passenger_vacations pv ON p.personID = pv.personID
+	JOIN passenger ps ON p.personID = ps.personID
+	WHERE p.locationID = v_departure_locationID
+	AND pv.sequence = 1 
+	AND pv.airportID = v_arrival 
+	AND ps.funds >= v_cost;
+
+	-- Are there enough seats for passengers
+	IF v_boarding_count > v_seat_capacity THEN
+    -- If not, do not add board any passengers
+    signal sqlstate '45000' set message_text = 'Passengers_board: Not enough seats for all passengers';
 		LEAVE sp_main;
-	 END IF; 
-	 
-	 -- Flight information
-	 SELECT routeID, support_airline, support_tail, progress, cost INTO v_routeID, v_support_airline, v_support_tail, v_progress, v_cost FROM flight WHERE flightID = ip_flightID; 
-	 SELECT seat_capacity, locationID INTO v_seat_capacity, v_locationID FROM airplane WHERE airlineID = v_support_airline AND tail_num = v_support_tail; 
-	 SELECT legID INTO v_legID FROM route_path WHERE routeID = v_routeID AND sequence = v_progress + 1; 
-	 
-	 -- Arrival and departure details
-	 SELECT arrival, departure INTO v_arrival, v_departure FROM leg WHERE legID = v_legID; 
-	 SELECT locationID INTO v_arrival_locationID FROM airport WHERE airportID = v_arrival; 
-	 SELECT locationID INTO v_departure_locationID FROM airport WHERE airportID = v_departure; 
-	 
-	 SELECT count(*) INTO v_boarding_count 
-	 FROM person pe
-	 JOIN passenger_vacations pv ON pe.personID = pv.personID 
-	 JOIN passenger pa ON pe.personID = pa.personID 
-	 WHERE pe.locationID = v_departure_locationID
-	 AND pv.sequence = 1 
-	 AND pv.airportID = v_arrival
-	 AND pa.funds >= v_cost; 
-	 
-	 -- Are there enough seats?
-	 IF v_boarding_count > v_seat_capacity THEN
-		signal sqlstate '45000' set message_text = 'Passengers_board: Not enough seats';
-		LEAVE sp_main; 
-	 ELSE
-	 UPDATE person p 
-	 JOIN passenger_vacations pv ON p.personID = pv.personID 
-	 JOIN passenger pa ON p.personID = pa.personID 
-	 SET p.locationID = v_locationID 
-	 WHERE p.locationID = v_departure_locationID 
-	 AND pv.sequence = 1 
-	 AND pv.airportID = v_arrival 
-	 AND pa.funds >= v_cost; 
-	 
-	 -- Remove funds
-	 UPDATE passenger pa 
-	 JOIN person p ON pa.personID = p.personID 
-	 JOIN passenger_vacations pv ON p.personID = pv.personID 
-	 SET pa.funds = pa.funds - v_cost 
-	 WHERE p.locationID = v_locationID 
-	 AND pv.sequence = 1 
-	 AND pv.airportID = v_arrival; 
-	  
-	 -- Edit seat availability
-	 UPDATE airplane 
-	 SET seat_capacity = seat_capacity - v_boarding_count 
-	 WHERE airlineID = v_support_airline AND tail_num = v_support_tail; 
-	 END IF; 
-	 
-	 END // 
-	 delimiter ;
+	ELSE
+    -- If not then don't board
+    UPDATE person pe
+    JOIN passenger_vacations pv ON pe.personID = pv.personID
+    JOIN passenger ps ON pe.personID = ps.personID
+    SET pe.locationID = v_locationID
+    WHERE pe.locationID = v_departure_locationID
+    AND pv.sequence = 1
+    AND pv.airportID = v_arrival
+    AND ps.funds >= v_cost;
+
+    -- Subtract funds
+    UPDATE passenger ps
+    JOIN person pe ON ps.personID = pe.personID
+    JOIN passenger_vacations pv ON pe.personID = pv.personID
+    SET ps.funds = ps.funds - v_cost
+    WHERE pe.locationID = v_locationID
+    AND pv.sequence = 1
+    AND pv.airportID = v_arrival;
+
+    -- Edit available seats
+    UPDATE airplane
+    SET seat_capacity = seat_capacity - v_boarding_count
+    WHERE airlineID = v_support_airline AND tail_num = v_support_tail;
+	END IF;
+    
+end //
+delimiter ;
+
 
 
 -- [9] passengers_disembark()
