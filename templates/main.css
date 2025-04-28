@@ -43,6 +43,12 @@ input {
     box-sizing: border-box;
 }
 
+select {
+    height: 1.5rem;
+    line-height: 1.5rem;
+    box-sizing: border-box;
+}
+
 .form_buttons {
     margin-top: 1.5rem;
     display: flex;

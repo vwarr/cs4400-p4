@@ -23,16 +23,19 @@
                     </div>
                     <div class="form_group">
                         <label for="maintenanced">Maintained:</label>
-                        <input id="maintenanced" list="maintenanced_options" name="maintenanced" placeholder="NULL">
-                        <datalist id="maintenanced_options">
-                            <option value="TRUE"></option>
-                            <option value="FALSE"></option>
-                            <option value="NULL"></option>
-                        </datalist>
+                        <select id="maintenanced" list="maintenanced_options" name="maintenanced" placeholder="Null">
+                            <option value="True">True</option>
+                            <option value="False">False</option>
+                            <option value="Null">Null</option>
+                        </select>
                     </div>
                     <div class="form_group">
                         <label for="neo">Neo:</label>
-                        <input id="neo" type="text" name="neo" placeholder="TRUE">
+                        <select id="neo" type="text" name="neo" placeholder="TRUE">
+                            <option value="True">True</option>
+                            <option value="False">False</option>
+                            <option value="Null">Null</option>
+                        </select>
                     </div>
                 </div>
                 <div class='form_column'>
@@ -46,9 +49,9 @@
                     </div>
                     <div class="form_group">
                         <label for="model">Model:</label>
-                        <input id="model" list="model_options" name="model" placeholder="NULL">
+                        <input id="model" list="model_options" name="model" placeholder="Null">
                         <datalist id="model_options">
-                            <option value="NULL">
+                            <option value="Null">
                         </datalist>
                     </div>
                 </div>
@@ -59,12 +62,11 @@
                     </div>
                     <div class="form_group">
                         <label for="plane_type">Plane Type:</label>
-                        <input id="plane_type" list="plane_type_options" name="plane_type" placeholder="Airbus">
-                        <datalist id="plane_type_options">
-                            <option value="Airbus">
-                            <option value="Boeing">
-                            <option value="NULL">
-                        </datalist>
+                        <select id="plane_type" list="plane_type_options" name="plane_type" placeholder="Airbus">
+                            <option value="Airbus">Airbus</option>
+                            <option value="Boeing">Boeing</option>
+                            <option value="Null">Null</option>
+                        </select>
                     </div>
                 </div>
             </div>
