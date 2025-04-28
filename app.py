@@ -158,16 +158,24 @@ def api_add_person():
 def api_toggle_pilot_license():
     if request.method == 'GET':
         return render_template('grant_or_revoke.html')
+    data = request.form
+    missing = [f for f in ('personID', 'license') if not data.get(f)]
+    if missing:
+        return render_template('grant_or_revoke.html', success=False,
+                               error='Missing fields: ' + ', '.join(missing))
+    pid = data['personID'].strip()
+    lic = data['license'].strip()
+    if len(pid) > 50 or len(lic) > 100:
+        return render_template('grant_or_revoke.html', success=False,
+                               error='personID ≤50 chars; license ≤100 chars')
+    args = [pid, lic]
     try:
-        print("grant/revoke license")
-        data = request.form
-        args = [data['personID'], data['license']]
         g.db_cursor.callproc('grant_or_revoke_pilot_license', args)
         g.db_conn.commit()
         return render_template('grant_or_revoke.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('grant_or_revoke.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('grant_or_revoke.html', success=False,
+                               error=handler.handle_db_error(e))
 
 @app.route('/offer_flight', methods=['POST', 'GET'])
 def api_offer_flight():
