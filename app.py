@@ -181,19 +181,35 @@ def api_toggle_pilot_license():
 def api_offer_flight():
     if request.method == 'GET':
         return render_template('offer_flight.html')
+    data = request.form
+    missing = [f for f in ('flightID', 'routeID', 'progress', 'next_time', 'cost') if not data.get(f)]
+    if missing:
+        return render_template('offer_flight.html', success=False,
+                               error='Missing fields: ' + ', '.join(missing))
     try:
-        print("offer_flight")
-        data = request.form
-        args = [
-            data['flightID'], data['routeID'], data['support_airline'],
-            data['support_tail'], data['progress'], data['next_time'], data['cost']
-        ]
+        prog = int(data['progress'])
+        cost = int(data['cost'])
+        if prog < 0 or cost < 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        return render_template('offer_flight.html', success=False,
+                               error='progress & cost must be non-negative integers')
+    args = [
+        data['flightID'],
+        data['routeID'],
+        data.get('support_airline'),
+        data.get('support_tail'),
+        prog,
+        data['next_time'],
+        cost
+    ]
+    try:
         g.db_cursor.callproc('offer_flight', args)
         g.db_conn.commit()
         return render_template('offer_flight.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('offer_flight.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('offer_flight.html', success=False,
+                               error=handler.handle_db_error(e))
 
 @app.route('/flight_landing', methods=['POST', 'GET'])
 def api_flight_landing():
