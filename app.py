@@ -1,10 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
-import backend as be
-from flask import Flask, g, jsonify
+from flask import Flask, render_template, request, redirect, url_for, g, jsonify
 from dotenv import load_dotenv
 import os
-from flask import Flask, g, request, jsonify
 from mysql.connector import pooling, errorcode, DatabaseError, IntegrityError
+import error_handle as handler
 
 load_dotenv()
 app = Flask(__name__)
@@ -29,14 +27,6 @@ def close_db(exc):
         g.db_cursor.close()
     if hasattr(g, 'db_conn'):
         g.db_conn.close()
-
-def handle_db_error(e):
-    if isinstance(e, IntegrityError):
-        if e.errno == errorcode.ER_DUP_ENTRY:
-            return "Duplicate entry."
-        if e.errno in (errorcode.ER_NO_REFERENCED_ROW_2, errorcode.ER_NO_REFERENCED_ROW):
-            return "Invalid reference to another record."
-    return "Unexpected database behavior. Please check your inputs and try again."
 
 @app.route("/")
 def index():
@@ -79,44 +69,90 @@ def api_add_airplane():
         g.db_conn.commit()
         return render_template('add_airplane.html', success=True)
     except (IntegrityError, DatabaseError) as e:
-        return render_template('add_airplane.html', success=False, error=handle_db_error(e))
+        return render_template('add_airplane.html', success=False, error=handler.handle_db_error(e))
 
 @app.route('/add_airport', methods=['POST', 'GET'])
 def api_add_airport():
     if request.method == 'GET':
         return render_template('add_airport.html')
+
+    data = request.form
+
+    missing = [f for f in ('airportID','city','state','country') if not data.get(f)]
+    if missing:
+        return render_template('add_airport.html',
+                               success=False,
+                               error=f"Missing fields: {', '.join(missing)}")
+
+    if len(data['airportID']) != 3:
+        return render_template('add_airport.html',
+                               success=False,
+                               error="airportID must be exactly 3 characters")
+    if len(data['country']) != 3:
+        return render_template('add_airport.html',
+                               success=False,
+                               error="country code must be 3 characters")
+
+    args = [
+        data['airportID'],
+        data.get('airport_name') or None,
+        data['city'],
+        data['state'],
+        data['country'],
+        data.get('locationID') or None
+    ]
+
     try:
-        print("add_airport")
-        data = request.form
-        args = [
-            data['airportID'], data.get('airport_name'), data['city'],
-            data['state'], data['country'], data.get('locationID')
-        ]
         g.db_cursor.callproc('add_airport', args)
         g.db_conn.commit()
         return render_template('add_airport.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('add_airport.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('add_airport.html',
+                               success=False,
+                               error=handler.handle_db_error(e))
 
 @app.route('/add_person', methods=['POST', 'GET'])
 def api_add_person():
     if request.method == 'GET':
         return render_template('add_person.html')
+
+    data = request.form
+    missing = [f for f in ('personID', 'first_name', 'locationID') if not data.get(f)]
+    if missing:
+        return render_template('add_person.html',
+                               success=False,
+                               error=f"Missing fields: {', '.join(missing)}")
+
     try:
-        print("add_person")
-        data = request.form
-        args = [
-            data['personID'], data['first_name'], data.get('last_name'),
-            data['locationID'], data.get('taxID'), data.get('experience'),
-            data.get('miles'), data.get('funds')
-        ]
+        exp = int(data['experience']) if data.get('experience') else None
+        miles = int(data['miles']) if data.get('miles') else None
+        funds = int(data['funds']) if data.get('funds') else None
+        if any(x is not None and x < 0 for x in (exp, miles, funds)):
+            raise ValueError
+    except (ValueError, TypeError):
+        return render_template('add_person.html',
+                               success=False,
+                               error="experience, miles, and funds must be non-negative integers")
+
+    args = [
+        data['personID'],
+        data['first_name'],
+        data.get('last_name') or None,
+        data['locationID'],
+        data.get('taxID') or None,
+        exp,
+        miles,
+        funds
+    ]
+
+    try:
         g.db_cursor.callproc('add_person', args)
         g.db_conn.commit()
         return render_template('add_person.html', success=True)
-    except DatabaseError as e:
-        print(e)
-        return render_template('add_person.html', success=False)
+    except (IntegrityError, DatabaseError) as e:
+        return render_template('add_person.html',
+                               success=False,
+                               error=handler.handle_db_error(e))
 
 @app.route('/grant_or_revoke_pilot_license', methods=['POST', 'GET'])
 def api_toggle_pilot_license():
