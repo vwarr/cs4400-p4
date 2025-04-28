@@ -1,41 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="main.css">
-    <title>Airline Management System</title>
+    <title>Flights on the Ground</title>
 </head>
 <body>
-    <h1>flights_on_the_ground()</h1>
-    <table border="1">
-        <thead>
+    <h1>Currently Grounded Flights</h1>
+        <table border="1">
             <tr>
-                <th>departing_from</th>
-                <th>num_flights</th>
-                <th>flight_list</th>
-                <th>earliest_arrival</th>
-                <th>latest_arrival</th>
-                <th>airplane_list</th>
+                {% for key in flights[0].keys() %}
+                    <th>{{ key }}</th>
+                {% endfor %}
             </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
+            {% for flight in flights %}
             <tr>
-                <td>{{ row.departing_from }}</td>
-                <td>{{ row.num_flights }}</td>
-                <td>{{ row.flight_list }}</td>
-                <td>{{ row.earliest_arrival }}</td>
-                <td>{{ row.latest_arrival }}</td>
-                <td>{{ row.airplane_list }}</td>
+                {% for value in flight.values() %}
+                    <td>{{ value }}</td>
+                {% endfor %}
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    <form class="form_wrapper" action="flights_on_the_ground" method="POST">
-        <div class="form_buttons">
-            <button type="button" onclick="window.location.href='/'">Cancel</button>
-        </div>
-    </form>
+        </table>
+    <p><a href="{{ url_for('index') }}">Back to Home</a></p>
 </body>
+</html>

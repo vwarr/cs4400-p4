@@ -301,33 +301,80 @@ def api_simulation_cycle():
 @app.route('/alternate_airports', methods=['POST', 'GET'])
 def alternate_airports():
     print("alt airports")
-    return render_template('alternate_airports.html')
+    try:
+        print('flights in the air')
+        # Execute query to get data directly from the view
+        g.db_cursor.execute("SELECT * FROM alternative_airports")
+        airports = g.db_cursor.fetchall()
+        return render_template('alternative_airports.html', airports=airports)
+    except DatabaseError as e:
+        print(e)
+        return render_template('alternative_airports.html', error=str(e))
 
-@app.route('/flights_in_the_air', methods=['POST', 'GET'])
+@app.route('/flights_in_the_air', methods=['GET'])
 def flights_in_the_air():
-    print("flights in the air")
-    return render_template('flights_in_the_air.html')
+    try:
+        print('flights in the air')
+        # Execute query to get data directly from the view
+        g.db_cursor.execute("SELECT * FROM flights_in_the_air")
+        flights = g.db_cursor.fetchall()
+        return render_template('flights_in_the_air.html', flights=flights)
+    except DatabaseError as e:
+        print(e)
+        return render_template('flights_in_the_air.html', error=str(e))
 
 @app.route('/flights_on_the_ground', methods=['POST', 'GET'])
 def flights_on_the_ground():
     print("flights in the ground")
-    return render_template('flights_on_the_ground.html')
+    try:
+        # Execute query to get data directly from the view
+        g.db_cursor.execute("SELECT * FROM flights_on_the_ground")
+        flights = g.db_cursor.fetchall()
+        print(flights)
+        return render_template('flights_on_the_ground.html', flights=flights)
+    except DatabaseError as e:
+        print(e)
+        return render_template('flights_on_the_ground.html', error=str(e))
 
 @app.route('/people_in_the_air', methods=['POST', 'GET'])
 def people_in_the_air():
     print("ppl in the air")
-    return render_template('people_in_the_air.html')
+    try:
+        # Execute query to get data directly from the view
+        g.db_cursor.execute("SELECT * FROM people_in_the_air")
+        ppl = g.db_cursor.fetchall()
+        print(ppl)
+        return render_template('people_in_the_air.html', ppl=ppl)
+    except DatabaseError as e:
+        print(e)
+        return render_template('people_in_the_air.html', error=str(e))
 
 @app.route('/people_on_the_ground', methods=['POST', 'GET'])
 def people_on_the_ground():
     print("ppl in the ground")
-    return render_template('people_on_the_ground.html')
+    try:
+        # Execute query to get data directly from the view
+        g.db_cursor.execute("SELECT * FROM people_on_the_ground")
+        ppl = g.db_cursor.fetchall()
+        print(ppl)
+        return render_template('people_on_the_ground.html', ppl=ppl)
+    except DatabaseError as e:
+        print(e)
+        return render_template('people_on_the_ground.html', error=str(e))
 
 @app.route('/route_summary', methods=['POST', 'GET'])
 def route_summary():
     print("route_summary")
-    return render_template('route_summary.html')
-
+    try:
+        # Execute query to get data directly from the view
+        g.db_cursor.execute("SELECT * FROM route_summary")
+        routes = g.db_cursor.fetchall()
+        print(routes)
+        return render_template('route_summary.html', routes=routes)
+    except DatabaseError as e:
+        print(e)
+        return render_template('route_summary.html', error=str(e))
+    
 if __name__ == '__main__':
     app.run(debug=True)
 
