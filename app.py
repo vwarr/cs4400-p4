@@ -252,39 +252,39 @@ def api_flight_takeoff():
 @app.route('/passengers_board', methods=['GET', 'POST'])
 def api_passengers_board():
     if request.method == 'GET':
-        return render_template('passengers.board.html')
+        return render_template('passengers_board.html')
     fid = request.form.get('flightID')
     if not fid:
-        return render_template('passengers.board.html', success=False,
+        return render_template('passengers_board.html', success=False,
                                error='Missing flightID')
     if len(fid) > 50:
-        return render_template('passengers.board.html', success=False,
+        return render_template('passengers_board.html', success=False,
                                error='flightID too long')
     try:
         g.db_cursor.callproc('passengers_board', [fid])
         g.db_conn.commit()
-        return render_template('passengers.board.html', success=True)
+        return render_template('passengers_board.html', success=True)
     except (IntegrityError, DatabaseError) as e:
-        return render_template('passengers.board.html', success=False,
+        return render_template('passengers_board.html', success=False,
                                error=handler.handle_db_error(e))
 
 @app.route('/passengers_disembark', methods=['GET', 'POST'])
 def api_passengers_disembark():
     if request.method == 'GET':
-        return render_template('passengers.disembark.html')
+        return render_template('passengers_disembark.html')
     fid = request.form.get('flightID')
     if not fid:
-        return render_template('passengers.disembark.html', success=False,
+        return render_template('passengers_disembark.html', success=False,
                                error='Missing flightID')
     if len(fid) > 50:
-        return render_template('passengers.disembark.html', success=False,
+        return render_template('passengers_disembark.html', success=False,
                                error='flightID too long')
     try:
         g.db_cursor.callproc('passengers_disembark', [fid])
         g.db_conn.commit()
-        return render_template('passengers.disembark.html', success=True)
+        return render_template('passengers_disembark.html', success=True)
     except (IntegrityError, DatabaseError) as e:
-        return render_template('passengers.disembark.html', success=False,
+        return render_template('passengers_disembark.html', success=False,
                                error=handler.handle_db_error(e))
 
 @app.route('/assign_pilot', methods=['GET', 'POST'])
