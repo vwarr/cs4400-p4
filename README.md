@@ -8,26 +8,21 @@ A Flask-powered frontend for our airline management system, backed by MySQL stor
 - pip  
 
 ## Setup
-git clone <your-repo-url> && cd <your-repo>
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-## create MySQL database and grant privileges
-## (e.g. as root)
-mysql> CREATE DATABASE flight_tracking CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-mysql> GRANT CREATE ROUTINE, EXECUTE, SELECT, INSERT, UPDATE, DELETE ON flight_tracking.* TO 'your_user'@'localhost';
+- git clone https://github.com/vwarr/cs4400-p4.git && cd cs4400-p4
+- python -m venv venv
+- source venv/bin/activate
+- pip install -r requirements.txt
 
 ## load all stored procedures/functions/views
-mysql -u root -p flight_tracking < cs4400_sams_phase3_mechanics_TEMPLATE_v0_fresh.sql
+- mysql -u root -p flight_tracking < cs4400_sams_phase3_mechanics_TEMPLATE_v0_fresh.sql
 
 ## create a .env file in project root with:
-MYSQL_HOST=localhost
-MYSQL_USER=your_user
-MYSQL_PASS=your_password
-MYSQL_DB=flight_tracking
-MYSQL_PORT=3306
-FLASK_ENV=development
+-MYSQL_HOST=localhost
+- MYSQL_USER=your_user
+- MYSQL_PASS=your_password
+- MYSQL_DB=flight_tracking
+- MYSQL_PORT=3306
+- FLASK_ENV=development
 
 ## start the Flask app
 flask run
