@@ -1,6 +1,8 @@
 from mysql.connector import pooling, errorcode, DatabaseError, IntegrityError
 
 def handle_db_error(e):
+    if hasattr(e, 'msg') and isinstance(e.msg, str):
+        return e.msg;
     if isinstance(e, IntegrityError):
         if e.errno == errorcode.ER_DUP_ENTRY:
             return "Duplicate entry."

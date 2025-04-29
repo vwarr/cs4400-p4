@@ -173,11 +173,11 @@ sp_main: begin
     
 	-- Ensure that the location is valid
 	if not exists (select 1 from Location where locationID = ip_locationID) then
-        signal sqlstate '45000' set message_text = 'Add_person: Location is invalid';
+        signal sqlstate '45000' set message_text = 'Add_person: Location is invalid / does not exist';
         leave sp_main;
     -- Ensure that the persion ID is unique
 	elseif exists (select 1 from Person where personID = ip_personID) then
-        signal sqlstate '45000' set message_text = 'Add_person: PersonID is invalid';
+        signal sqlstate '45000' set message_text = 'Add_person: PersonID is invalid / not unique';
 
         leave sp_main;
     -- Ensure that the person is a pilot or passenger
@@ -223,8 +223,10 @@ sp_main: begin
         ELSE
 			INSERT INTO pilot_licenses VALUES (ip_personID, ip_license);
 		END IF;
+    ELSE
+		signal sqlstate '45000' set message_text = 'Person with valid ID does not exist';
+		leave sp_main;
 	END IF;
-
 end //
 delimiter ;
 

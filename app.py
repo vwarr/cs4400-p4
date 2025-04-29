@@ -86,11 +86,11 @@ def api_add_airport():
     if len(data['airportID']) != 3:
         return render_template('add_airport.html',
                                success=False,
-                               error="airportID must be exactly 3 characters")
+                               error="AirportID must be exactly 3 characters")
     if len(data['country']) != 3:
         return render_template('add_airport.html',
                                success=False,
-                               error="country code must be 3 characters")
+                               error="Country code must be 3 characters")
 
     replace_null_strings(data)
     
@@ -193,7 +193,7 @@ def api_offer_flight():
             raise ValueError
     except (ValueError, TypeError):
         return render_template('offer_flight.html', success=False,
-                               error='progress & cost must be non-negative integers')
+                               error='Progress & cost must be non-negative integers')
     args = [
         data['flightID'],
         data['routeID'],
@@ -240,7 +240,7 @@ def api_flight_takeoff():
                                error='Missing flightID')
     if len(fid) > 50:
         return render_template('flight_takeoff.html', success=False,
-                               error='flightID too long')
+                               error='FlightID too long')
     try:
         g.db_cursor.callproc('flight_takeoff', [fid])
         g.db_conn.commit()
@@ -259,7 +259,7 @@ def api_passengers_board():
                                error='Missing flightID')
     if len(fid) > 50:
         return render_template('passengers_board.html', success=False,
-                               error='flightID too long')
+                               error='FlightID too long')
     try:
         g.db_cursor.callproc('passengers_board', [fid])
         g.db_conn.commit()
@@ -278,7 +278,7 @@ def api_passengers_disembark():
                                error='Missing flightID')
     if len(fid) > 50:
         return render_template('passengers_disembark.html', success=False,
-                               error='flightID too long')
+                               error='FlightID too long')
     try:
         g.db_cursor.callproc('passengers_disembark', [fid])
         g.db_conn.commit()
@@ -319,7 +319,7 @@ def api_recycle_crew():
                                error='Missing flightID')
     if len(fid) > 50:
         return render_template('recycle_crew.html', success=False,
-                               error='flightID too long')
+                               error='FlightID too long')
     try:
         g.db_cursor.callproc('recycle_crew', [fid])
         g.db_conn.commit()
@@ -338,7 +338,7 @@ def api_retire_flight():
                                error='Missing flightID')
     if len(fid) > 50:
         return render_template('retire_flight.html', success=False,
-                               error='flightID too long')
+                               error='FlightID too long')
     try:
         g.db_cursor.callproc('retire_flight', [fid])
         g.db_conn.commit()
@@ -364,10 +364,10 @@ def alternate_airports():
     try:
         g.db_cursor.execute("SELECT * FROM alternative_airports")
         airports = g.db_cursor.fetchall()
-        return render_template('alternative_airports.html', airports=airports)
+        return render_template('alternate_airports.html', airports=airports)
     except DatabaseError as e:
         print(e)
-        return render_template('alternative_airports.html', error=str(e))
+        return render_template('alternate_airports.html', error=str(e))
 
 @app.route('/flights_in_the_air', methods=['GET'])
 def flights_in_the_air():

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <title>Airline Management System</title>
 </head>
 <body>
@@ -35,7 +35,7 @@
                         <div class="form_group">
                             <label for="taxID">Tax ID:</label>
                             <input id="taxID" type="text" name="taxID" maxlength="11"
-                            pattern="\d{3}-\d{2}-\d{4}" placeholder="123-45-6789" required />
+                            pattern="\d{3}-\d{2}-\d{4}" placeholder="123-45-6789" />
                         </div>
                         <div class="form_group">
                             <label for="funds">Funds:</label>
@@ -48,7 +48,7 @@
                             <input id="last_name" type="text" name="last_name" placeholder="Duncan">
                         </div>
                         <div class="form_group">
-                            <label for="experience">Location ID:</label>
+                            <label for="experience">Experience:</label>
                             <input id="experience" type="number" name="experience" placeholder="27">
                         </div>
                     </div>
