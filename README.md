@@ -31,7 +31,7 @@ flask run
 http://127.0.0.1:5000
 
 ## this project uses:
-Flask 3.1, MySQL 8 with stored procedures/functions/views, mysql-connector-python with connection pooling, python-dotenv for configuration
+HTML frontend, Flask 3.1, MySQL 8 with stored procedures/functions/views, mysql-connector-python with connection pooling, python-dotenv for configuration
 
 ## Contributions:
 
