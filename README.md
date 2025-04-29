@@ -17,7 +17,7 @@ A Flask-powered frontend for our airline management system, backed by MySQL stor
 - mysql -u root -p flight_tracking < cs4400_sams_phase3_mechanics_TEMPLATE_v0_fresh.sql
 
 ## create a .env file in project root with:
--MYSQL_HOST=localhost
+- MYSQL_HOST=localhost
 - MYSQL_USER=your_user
 - MYSQL_PASS=your_password
 - MYSQL_DB=flight_tracking
