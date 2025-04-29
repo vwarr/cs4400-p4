@@ -40,6 +40,6 @@ Flask 3.1, MySQL 8 with stored procedures/functions/views, mysql-connector-pytho
 
 ## Contributions:
 
-Varun: Backend code and API routing for all CRUD operations
-Sharaf: Fixed SQL scripting, stored procedures, etc, and added view procedures
-Carlos: Built out entire HTML frontend
+- Varun: Backend code and API routing for all CRUD operations
+- Sharaf: Fixed SQL scripting, stored procedures, etc, and added view procedures
+- Carlos: Built out entire HTML frontend
